@@ -4,11 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
 
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL
-  // Allow build to succeed without DATABASE_URL — queries will fail at runtime
-  if (!connectionString) {
-    return new PrismaClient() as unknown as PrismaClient
-  }
+  const connectionString = process.env.DATABASE_URL ?? 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
   const adapter = new PrismaPg({ connectionString })
   return new PrismaClient({ adapter } as ConstructorParameters<typeof PrismaClient>[0])
 }
