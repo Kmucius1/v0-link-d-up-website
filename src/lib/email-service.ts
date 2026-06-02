@@ -1,5 +1,5 @@
 import { render } from '@react-email/render'
-import { resend, FROM, APP_URL } from './resend'
+import { getResend, getFrom, APP_URL } from './resend'
 import { db } from './db'
 import ConfirmationEmail from '@/emails/confirmation'
 import ReminderEmail from '@/emails/reminder'
@@ -46,8 +46,8 @@ export async function sendConfirmationEmail(contactId: string, eventId: string) 
     unsubscribeUrl: unsubUrl(contactId),
   }))
 
-  const { error } = await resend.emails.send({
-    from: FROM,
+  const { error } = await getResend().emails.send({
+    from: getFrom(),
     to: contact.email,
     subject,
     html,
@@ -75,7 +75,7 @@ export async function sendReminderEmail(contactId: string, eventId: string) {
     unsubscribeUrl: unsubUrl(contactId),
   }))
 
-  const { error } = await resend.emails.send({ from: FROM, to: contact.email, subject, html })
+  const { error } = await getResend().emails.send({ from: getFrom(), to: contact.email, subject, html })
   await logEmail({ contactId, eventId, emailType: 'reminder', subject, status: error ? 'failed' : 'sent', errorMessage: error?.message })
 }
 
@@ -96,7 +96,7 @@ export async function sendDayOfEmail(contactId: string, eventId: string) {
     unsubscribeUrl: unsubUrl(contactId),
   }))
 
-  const { error } = await resend.emails.send({ from: FROM, to: contact.email, subject, html })
+  const { error } = await getResend().emails.send({ from: getFrom(), to: contact.email, subject, html })
   await logEmail({ contactId, eventId, emailType: 'day-of', subject, status: error ? 'failed' : 'sent', errorMessage: error?.message })
 }
 
@@ -114,7 +114,7 @@ export async function sendThankYouEmail(contactId: string, eventId: string) {
     unsubscribeUrl: unsubUrl(contactId),
   }))
 
-  const { error } = await resend.emails.send({ from: FROM, to: contact.email, subject, html })
+  const { error } = await getResend().emails.send({ from: getFrom(), to: contact.email, subject, html })
   await logEmail({ contactId, eventId, emailType: 'thank-you', subject, status: error ? 'failed' : 'sent', errorMessage: error?.message })
 }
 
@@ -129,7 +129,7 @@ export async function sendSurveyEmail(contactId: string, eventId?: string, surve
     unsubscribeUrl: unsubUrl(contactId),
   }))
 
-  const { error } = await resend.emails.send({ from: FROM, to: contact.email, subject, html })
+  const { error } = await getResend().emails.send({ from: getFrom(), to: contact.email, subject, html })
   await logEmail({ contactId, eventId, emailType: 'survey', subject, status: error ? 'failed' : 'sent', errorMessage: error?.message })
 }
 
@@ -152,7 +152,7 @@ export async function sendEventInviteEmail(contactId: string, eventId: string) {
     unsubscribeUrl: unsubUrl(contactId),
   }))
 
-  const { error } = await resend.emails.send({ from: FROM, to: contact.email, subject, html })
+  const { error } = await getResend().emails.send({ from: getFrom(), to: contact.email, subject, html })
   await logEmail({ contactId, eventId, emailType: 'event-invite', subject, status: error ? 'failed' : 'sent', errorMessage: error?.message })
 }
 
@@ -172,7 +172,7 @@ export async function sendCampaignEmail({
   const contact = await db.contact.findUnique({ where: { id: contactId } })
   if (!contact || !contact.consentToEmail || contact.unsubscribed) return { skipped: true }
 
-  const { error } = await resend.emails.send({ from: FROM, to: contact.email, subject, html: htmlBody })
+  const { error } = await getResend().emails.send({ from: getFrom(), to: contact.email, subject, html: htmlBody })
   await logEmail({ contactId, eventId, emailType, subject, status: error ? 'failed' : 'sent', errorMessage: error?.message })
   return { error }
 }

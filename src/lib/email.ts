@@ -1,10 +1,15 @@
 import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy init — only instantiated at runtime, never during build
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
-const FROM = process.env.RESEND_FROM_EMAIL
-  ? `${process.env.RESEND_FROM_NAME || "LINK'D UP"} <${process.env.RESEND_FROM_EMAIL}>`
-  : "LINK'D UP <hello@drypdigital.com>"
+function getFrom() {
+  return process.env.RESEND_FROM_EMAIL
+    ? `${process.env.RESEND_FROM_NAME || "LINK'D UP"} <${process.env.RESEND_FROM_EMAIL}>`
+    : "LINK'D UP <linkdup@drypdigital.com>"
+}
 
 export async function sendRsvpConfirmation({
   to,
@@ -23,8 +28,8 @@ export async function sendRsvpConfirmation({
   locationName: string
   address: string
 }) {
-  return resend.emails.send({
-    from: FROM,
+  return getResend().emails.send({
+    from: getFrom(),
     to,
     subject: `You're confirmed for ${eventName} — LINK'D UP`,
     html: `
@@ -89,8 +94,8 @@ export async function sendSurveyRequest({
   eventName: string
   surveyUrl: string
 }) {
-  return resend.emails.send({
-    from: FROM,
+  return getResend().emails.send({
+    from: getFrom(),
     to,
     subject: `How was ${eventName}? Tell us! — LINK'D UP`,
     html: `
