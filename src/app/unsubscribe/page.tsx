@@ -21,27 +21,27 @@ function UnsubscribeContent() {
   }, [contactId])
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
-      <p className="text-[#a8d8f0] font-bold tracking-[0.4em] text-sm mb-12">LINK'D UP</p>
+    <div className="min-h-screen bg-[#050505] text-[#F7F7F7] flex flex-col items-center justify-center px-6">
+      <p className="text-[#7F90A8] font-bold tracking-[0.4em] text-sm mb-12">LINK'D UP</p>
       <div className="max-w-md text-center">
-        {status === 'loading' && <p className="text-[#888]">Processing...</p>}
+        {status === 'loading' && <p className="text-[#AEB9C8]">Processing...</p>}
         {status === 'done' && (
           <>
             <h1 className="text-3xl font-black mb-4">You've been unsubscribed.</h1>
-            <p className="text-[#888] mb-8">You won't receive any more emails from LINK'D UP. If this was a mistake, you can re-subscribe by RSVPing again at linkdup.club/rsvp.</p>
-            <a href="/" className="text-[#a8d8f0] hover:underline text-sm">← Return home</a>
+            <p className="text-[#AEB9C8] mb-8">You won't receive any more emails from LINK'D UP. If this was a mistake, you can re-subscribe by RSVPing again at linkdup.club/rsvp.</p>
+            <a href="/" className="text-[#7F90A8] hover:underline text-sm">← Return home</a>
           </>
         )}
         {status === 'error' && (
           <>
             <h1 className="text-3xl font-black mb-4">Something went wrong.</h1>
-            <p className="text-[#888]">Please try again or contact us at hello@drypdigital.com.</p>
+            <p className="text-[#AEB9C8]">Please try again or contact us at hello@drypdigital.com.</p>
           </>
         )}
         {status === 'idle' && !contactId && (
           <>
             <h1 className="text-3xl font-black mb-4">Invalid link.</h1>
-            <p className="text-[#888]">This unsubscribe link appears to be invalid.</p>
+            <p className="text-[#AEB9C8]">This unsubscribe link appears to be invalid.</p>
           </>
         )}
       </div>

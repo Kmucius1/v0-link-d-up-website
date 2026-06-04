@@ -87,42 +87,42 @@ function SurveyContent() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 text-center">
-        <p className="text-[#a8d8f0] font-bold tracking-[0.4em] text-sm mb-12">LINK'D UP</p>
-        <div className="w-16 h-16 rounded-full bg-[#1e3a4a] border border-[#a8d8f0]/30 flex items-center justify-center mx-auto mb-8">
+      <div className="min-h-screen bg-[#050505] text-[#F7F7F7] flex flex-col items-center justify-center px-6 text-center">
+        <p className="text-[#7F90A8] font-bold tracking-[0.4em] text-sm mb-12">LINK'D UP</p>
+        <div className="w-16 h-16 rounded-full bg-[#7F90A8]/10 border border-[#7F90A8]/30 flex items-center justify-center mx-auto mb-8">
           <svg width="26" height="20" viewBox="0 0 26 20" fill="none">
             <path d="M2 10L9 17L24 2" stroke="#a8d8f0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
         <h1 className="text-4xl font-black mb-4">Thank you.</h1>
-        <p className="text-[#888] text-lg max-w-md">Your feedback helps shape every future LINK'D UP event. We read every response.</p>
-        <a href="/" className="mt-10 text-[#a8d8f0] text-sm hover:underline">← Back to LINK'D UP</a>
+        <p className="text-[#AEB9C8] text-lg max-w-md">Your feedback helps shape every future LINK'D UP event. We read every response.</p>
+        <a href="/" className="mt-10 text-[#7F90A8] text-sm hover:underline">← Back to LINK'D UP</a>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="border-b border-[#1a1a1a] py-5 px-6">
+    <div className="min-h-screen bg-[#050505] text-[#F7F7F7]">
+      <div className="border-b border-[#7F90A8]/20 py-5 px-6">
         <div className="max-w-2xl mx-auto">
-          <span className="text-[#a8d8f0] font-bold tracking-[0.3em] text-base">LINK'D UP</span>
+          <span className="text-[#7F90A8] font-bold tracking-[0.3em] text-base">LINK'D UP</span>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="mb-10">
-          <div className="inline-block bg-[#1e3a4a] text-[#a8d8f0] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
+          <div className="inline-block bg-[#7F90A8]/10 text-[#7F90A8] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
             FEEDBACK SURVEY
           </div>
-          <h1 className="text-4xl font-black mb-3">Help shape the next<br /><span className="text-[#a8d8f0]">LINK'D UP.</span></h1>
-          <p className="text-[#888] text-lg">Your answers help us build better events. Takes 2 minutes.</p>
+          <h1 className="text-4xl font-black mb-3">Help shape the next<br /><span className="text-[#7F90A8]">LINK'D UP.</span></h1>
+          <p className="text-[#AEB9C8] text-lg">Your answers help us build better events. Takes 2 minutes.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-10">
 
           {/* Rating */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-4">
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-4">
               HOW WOULD YOU RATE THE EVENT?
             </label>
             <div className="flex gap-3">
@@ -133,14 +133,14 @@ function SurveyContent() {
                   onClick={() => setRating(n)}
                   className={`w-12 h-12 rounded-xl font-bold text-lg transition-all ${
                     rating >= n
-                      ? 'bg-[#a8d8f0] text-black'
-                      : 'bg-[#111] border border-[#1a1a1a] text-[#555] hover:border-[#a8d8f0]/40'
+                      ? 'bg-[#7F90A8] text-black'
+                      : 'bg-[#171717] border border-[#7F90A8]/20 text-[#AEB9C8]/70 hover:border-[#7F90A8]/40'
                   }`}
                 >
                   {n}
                 </button>
               ))}
-              <span className="self-center text-[#555] text-sm ml-2">
+              <span className="self-center text-[#AEB9C8]/70 text-sm ml-2">
                 {rating === 0 ? '' : rating <= 2 ? 'Needs work' : rating === 3 ? 'It was good' : rating === 4 ? 'Really good' : 'Amazing'}
               </span>
             </div>
@@ -148,8 +148,8 @@ function SurveyContent() {
 
           {/* What to do next */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              WHAT DO YOU WANT TO SEE NEXT? <span className="text-[#555] font-normal">(select all that apply)</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              WHAT DO YOU WANT TO SEE NEXT? <span className="text-[#AEB9C8]/70 font-normal">(select all that apply)</span>
             </label>
             <div className="flex flex-wrap gap-2 mt-4">
               {eventTypes.map((item) => (
@@ -159,8 +159,8 @@ function SurveyContent() {
                   onClick={() => toggle(selectedEvents, setSelectedEvents, item)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     selectedEvents.includes(item)
-                      ? 'bg-[#a8d8f0] text-black'
-                      : 'bg-[#111] border border-[#1a1a1a] text-[#ccc] hover:border-[#a8d8f0]/40'
+                      ? 'bg-[#7F90A8] text-black'
+                      : 'bg-[#171717] border border-[#7F90A8]/20 text-[#AEB9C8] hover:border-[#7F90A8]/40'
                   }`}
                 >
                   {item}
@@ -171,8 +171,8 @@ function SurveyContent() {
 
           {/* Opportunities */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              INTERESTED IN ANY OF THESE ROLES? <span className="text-[#555] font-normal">(select all that apply)</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              INTERESTED IN ANY OF THESE ROLES? <span className="text-[#AEB9C8]/70 font-normal">(select all that apply)</span>
             </label>
             <div className="flex flex-wrap gap-2 mt-4">
               {opportunities.map((item) => (
@@ -182,8 +182,8 @@ function SurveyContent() {
                   onClick={() => toggle(selectedOpportunities, setSelectedOpportunities, item)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     selectedOpportunities.includes(item)
-                      ? 'bg-[#a8d8f0] text-black'
-                      : 'bg-[#111] border border-[#1a1a1a] text-[#ccc] hover:border-[#a8d8f0]/40'
+                      ? 'bg-[#7F90A8] text-black'
+                      : 'bg-[#171717] border border-[#7F90A8]/20 text-[#AEB9C8] hover:border-[#7F90A8]/40'
                   }`}
                 >
                   {item}
@@ -194,8 +194,8 @@ function SurveyContent() {
 
           {/* Industries */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              WHAT INDUSTRIES SHOULD WE INVITE MORE OF? <span className="text-[#555] font-normal">(select all that apply)</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              WHAT INDUSTRIES SHOULD WE INVITE MORE OF? <span className="text-[#AEB9C8]/70 font-normal">(select all that apply)</span>
             </label>
             <div className="flex flex-wrap gap-2 mt-4">
               {industries.map((item) => (
@@ -205,8 +205,8 @@ function SurveyContent() {
                   onClick={() => toggle(selectedIndustries, setSelectedIndustries, item)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     selectedIndustries.includes(item)
-                      ? 'bg-[#a8d8f0] text-black'
-                      : 'bg-[#111] border border-[#1a1a1a] text-[#ccc] hover:border-[#a8d8f0]/40'
+                      ? 'bg-[#7F90A8] text-black'
+                      : 'bg-[#171717] border border-[#7F90A8]/20 text-[#AEB9C8] hover:border-[#7F90A8]/40'
                   }`}
                 >
                   {item}
@@ -217,7 +217,7 @@ function SurveyContent() {
 
           {/* Open feedback */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
               WHAT DID YOU LOVE? WHAT SHOULD WE CHANGE?
             </label>
             <textarea
@@ -225,13 +225,13 @@ function SurveyContent() {
               onChange={e => setKeyFeedback(e.target.value)}
               rows={4}
               placeholder="Be honest — what worked, what didn't, what would make this even better..."
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#444] focus:outline-none focus:border-[#a8d8f0] transition-colors resize-none mt-3"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors resize-none mt-3"
             />
           </div>
 
           {/* Follow up idea */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
               ANY OTHER IDEAS FOR LINK'D UP?
             </label>
             <textarea
@@ -239,7 +239,7 @@ function SurveyContent() {
               onChange={e => setSuggestedFollowUp(e.target.value)}
               rows={3}
               placeholder="Themes, venues, collaborations, features — anything goes..."
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#444] focus:outline-none focus:border-[#a8d8f0] transition-colors resize-none mt-3"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors resize-none mt-3"
             />
           </div>
 
@@ -252,12 +252,12 @@ function SurveyContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#a8d8f0] text-black font-bold py-4 rounded-xl text-lg hover:bg-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-[#7F90A8] text-black font-bold py-4 rounded-xl text-lg hover:bg-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Submitting...' : 'Submit Feedback'}
           </button>
 
-          <p className="text-center text-[#444] text-xs pb-8">
+          <p className="text-center text-[#7F90A8]/70 text-xs pb-8">
             LINK'D UP · linkdup.club · Brought to you by DRYP Digital
           </p>
         </form>

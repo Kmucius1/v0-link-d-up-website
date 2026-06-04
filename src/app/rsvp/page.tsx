@@ -79,25 +79,25 @@ export default function RsvpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-[#050505] text-[#F7F7F7]">
       {/* Header */}
-      <div className="border-b border-[#1a1a1a] py-5 px-6">
+      <div className="border-b border-[#7F90A8]/20 py-5 px-6">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <span className="text-[#a8d8f0] font-bold tracking-[0.3em] text-base">LINK'D UP</span>
-          <a href="/" className="text-[#888] text-sm hover:text-white transition-colors">← Back</a>
+          <span className="text-[#7F90A8] font-bold tracking-[0.3em] text-base">LINK'D UP</span>
+          <a href="/" className="text-[#AEB9C8] text-sm hover:text-[#F7F7F7] transition-colors">← Back</a>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-6 py-12">
         {/* Hero */}
         <div className="mb-10">
-          <div className="inline-block bg-[#1e3a4a] text-[#a8d8f0] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
+          <div className="inline-block bg-[#7F90A8]/10 text-[#7F90A8] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
             JUNE 4TH · THE RING WORKSPACE
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-3">
-            RSVP for<br /><span className="text-[#a8d8f0]">LINK'D UP</span>
+            RSVP for<br /><span className="text-[#7F90A8]">LINK'D UP</span>
           </h1>
-          <p className="text-[#888] text-lg leading-relaxed">
+          <p className="text-[#AEB9C8] text-lg leading-relaxed">
             Thursday, June 4th · 7:00 PM – 9:00 PM<br />
             The Ring Workspace · 600 Cleveland St, Clearwater, FL
           </p>
@@ -108,28 +108,28 @@ export default function RsvpPage() {
           {/* Name */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-                FIRST NAME <span className="text-white">*</span>
+              <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+                FIRST NAME <span className="text-[#F7F7F7]">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={form.firstName}
                 onChange={e => set('firstName', e.target.value)}
-                className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+                className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
                 placeholder="First name"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-                LAST NAME <span className="text-white">*</span>
+              <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+                LAST NAME <span className="text-[#F7F7F7]">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={form.lastName}
                 onChange={e => set('lastName', e.target.value)}
-                className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+                className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
                 placeholder="Last name"
               />
             </div>
@@ -137,57 +137,57 @@ export default function RsvpPage() {
 
           {/* Email */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              EMAIL <span className="text-white">*</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              EMAIL <span className="text-[#F7F7F7]">*</span>
             </label>
             <input
               type="email"
               required
               value={form.email}
               onChange={e => set('email', e.target.value)}
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
               placeholder="you@example.com"
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              PHONE <span className="text-[#555] font-normal">(optional)</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              PHONE <span className="text-[#AEB9C8]/70 font-normal">(optional)</span>
             </label>
             <input
               type="tel"
               value={form.phone}
               onChange={e => set('phone', e.target.value)}
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
               placeholder="(727) 000-0000"
             />
           </div>
 
           {/* Business */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              BUSINESS / BRAND NAME <span className="text-[#555] font-normal">(optional)</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              BUSINESS / BRAND NAME <span className="text-[#AEB9C8]/70 font-normal">(optional)</span>
             </label>
             <input
               type="text"
               value={form.businessName}
               onChange={e => set('businessName', e.target.value)}
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
               placeholder="Your business or brand"
             />
           </div>
 
           {/* Role / Industry */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              WHAT BEST DESCRIBES YOU? <span className="text-white">*</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              WHAT BEST DESCRIBES YOU? <span className="text-[#F7F7F7]">*</span>
             </label>
             <select
               required
               value={form.roleOrIndustry}
               onChange={e => set('roleOrIndustry', e.target.value)}
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#a8d8f0] transition-colors appearance-none"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] focus:outline-none focus:border-[#7F90A8] transition-colors appearance-none"
             >
               <option value="" disabled>Select your role or industry</option>
               {industries.map(i => (
@@ -198,40 +198,40 @@ export default function RsvpPage() {
 
           {/* Social links */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-              INSTAGRAM <span className="text-[#555] font-normal">(optional)</span>
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+              INSTAGRAM <span className="text-[#AEB9C8]/70 font-normal">(optional)</span>
             </label>
             <input
               type="text"
               value={form.instagram}
               onChange={e => set('instagram', e.target.value)}
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
               placeholder="@yourhandle"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-                LINKEDIN <span className="text-[#555] font-normal">(optional)</span>
+              <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+                LINKEDIN <span className="text-[#AEB9C8]/70 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 value={form.linkedin}
                 onChange={e => set('linkedin', e.target.value)}
-                className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+                className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
                 placeholder="linkedin.com/in/you"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
-                WEBSITE <span className="text-[#555] font-normal">(optional)</span>
+              <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
+                WEBSITE <span className="text-[#AEB9C8]/70 font-normal">(optional)</span>
               </label>
               <input
                 type="url"
                 value={form.website}
                 onChange={e => set('website', e.target.value)}
-                className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#a8d8f0] transition-colors"
+                className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
                 placeholder="yoursite.com"
               />
             </div>
@@ -239,13 +239,13 @@ export default function RsvpPage() {
 
           {/* Guests */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
               ARE YOU BRINGING ANYONE?
             </label>
             <select
               value={form.numberOfGuests}
               onChange={e => set('numberOfGuests', e.target.value)}
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#a8d8f0] transition-colors appearance-none"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] focus:outline-none focus:border-[#7F90A8] transition-colors appearance-none"
             >
               <option value="1">Just me</option>
               <option value="2">Me + 1 guest</option>
@@ -257,13 +257,13 @@ export default function RsvpPage() {
 
           {/* How did you hear */}
           <div>
-            <label className="block text-xs font-bold tracking-[0.15em] text-[#a8d8f0] mb-2">
+            <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-2">
               HOW DID YOU HEAR ABOUT LINK'D UP?
             </label>
             <select
               value={form.howDidYouHear}
               onChange={e => set('howDidYouHear', e.target.value)}
-              className="w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#a8d8f0] transition-colors appearance-none"
+              className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] focus:outline-none focus:border-[#7F90A8] transition-colors appearance-none"
             >
               <option value="">Select an option</option>
               {howDidYouHearOptions.map(o => (
@@ -273,7 +273,7 @@ export default function RsvpPage() {
           </div>
 
           {/* Consent */}
-          <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-5">
+          <div className="bg-[#171717] border border-[#7F90A8]/20 rounded-xl p-5">
             <label className="flex gap-4 cursor-pointer">
               <div className="relative flex-shrink-0 mt-0.5">
                 <input
@@ -285,7 +285,7 @@ export default function RsvpPage() {
                 <div
                   onClick={() => set('consentToEmail', !form.consentToEmail)}
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors cursor-pointer ${
-                    form.consentToEmail ? 'bg-[#a8d8f0] border-[#a8d8f0]' : 'border-[#333] bg-transparent'
+                    form.consentToEmail ? 'bg-[#7F90A8] border-[#7F90A8]' : 'border-[#333] bg-transparent'
                   }`}
                 >
                   {form.consentToEmail && (
@@ -295,7 +295,7 @@ export default function RsvpPage() {
                   )}
                 </div>
               </div>
-              <span className="text-[#ccc] text-sm leading-relaxed">
+              <span className="text-[#AEB9C8] text-sm leading-relaxed">
                 Yes, I want to receive LINK'D UP updates, event reminders, surveys, and future invitations. You can unsubscribe at any time.
               </span>
             </label>
@@ -310,12 +310,12 @@ export default function RsvpPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#a8d8f0] text-black font-bold py-4 rounded-xl text-lg hover:bg-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-[#7F90A8] text-black font-bold py-4 rounded-xl text-lg hover:bg-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Submitting...' : "RSVP — I'm In"}
           </button>
 
-          <p className="text-center text-[#555] text-xs">
+          <p className="text-center text-[#AEB9C8]/70 text-xs">
             By RSVPing, your information will only be used for LINK'D UP event communications.
           </p>
         </form>
