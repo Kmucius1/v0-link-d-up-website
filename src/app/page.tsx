@@ -92,14 +92,14 @@ export default function Home() {
 
       {/* Event Details */}
       <section id="event" className="max-w-5xl mx-auto px-6 py-20">
-        <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.25em] uppercase mb-4">First Event</p>
-        <h2 className="text-3xl sm:text-4xl font-bold text-[#F7F7F7] mb-3">Our First Event Is Here</h2>
+        <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.25em] uppercase mb-4">Next Event</p>
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#F7F7F7] mb-3">Our Next Event Is Here</h2>
         <p className="text-[#AEB9C8] text-lg max-w-2xl mb-10">A room full of creators, media minds, entrepreneurs, models, photographers, videographers, influencers, artists, and people ready to connect.</p>
         <div className="bg-[#171717] border border-[#7F90A8]/20 rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-3 gap-8">
           <div>
             <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.2em] uppercase mb-3">Date</p>
-            <p className="text-[#F7F7F7] text-xl font-semibold">Thursday, June 4</p>
-            <p className="text-[#AEB9C8] text-sm mt-1">Evening Event</p>
+            <p className="text-[#F7F7F7] text-xl font-semibold">Thursday, July 16</p>
+            <p className="text-[#AEB9C8] text-sm mt-1">6:00 PM – 8:30 PM</p>
           </div>
           <div>
             <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.2em] uppercase mb-3">Location</p>
@@ -227,7 +227,7 @@ export default function Home() {
           <div>
             <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.2em] uppercase mb-3">Explore</p>
             <div className="space-y-2 text-sm text-[#AEB9C8]">
-              <a href="#event" className="block hover:text-[#F7F7F7] transition-colors">First Event</a>
+              <a href="#event" className="block hover:text-[#F7F7F7] transition-colors">Next Event</a>
               <a href="#why" className="block hover:text-[#F7F7F7] transition-colors">Why Attend</a>
               <a href="#partners" className="block hover:text-[#F7F7F7] transition-colors">Partners</a>
             </div>
@@ -245,8 +245,9 @@ export default function Home() {
             <a href="mailto:hello@linkdup.com" className="text-sm text-[#AEB9C8] hover:text-[#F7F7F7] transition-colors block">hello@linkdup.com</a>
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pt-6 border-t border-[#7F90A8]/10 text-center text-xs text-[#AEB9C8]">
-          © 2026 Link&apos;d Up. All rights reserved.
+        <div className="max-w-5xl mx-auto px-6 pt-6 border-t border-[#7F90A8]/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#AEB9C8]">
+          <span>© 2026 Link&apos;d Up. All rights reserved.</span>
+          <Link href="/admin/login" className="text-[#7F90A8]/50 hover:text-[#7F90A8] transition-colors">Admin Portal</Link>
         </div>
       </footer>
 

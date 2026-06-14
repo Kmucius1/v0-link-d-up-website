@@ -92,13 +92,13 @@ export default function RsvpPage() {
         {/* Hero */}
         <div className="mb-10">
           <div className="inline-block bg-[#7F90A8]/10 text-[#7F90A8] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
-            JUNE 4TH · THE RING WORKSPACE
+            JULY 16TH · THE RING WORKSPACE
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-3">
             RSVP for<br /><span className="text-[#7F90A8]">LINK'D UP</span>
           </h1>
           <p className="text-[#AEB9C8] text-lg leading-relaxed">
-            Thursday, June 4th · 7:00 PM – 9:00 PM<br />
+            Thursday, July 16th · 6:00 PM – 8:30 PM<br />
             The Ring Workspace · 600 Cleveland St, Clearwater, FL
           </p>
         </div>

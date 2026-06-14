@@ -32,8 +32,8 @@ export default function RsvpSuccessPage() {
             <div className="flex items-start gap-3">
               <span className="text-[#7F90A8] mt-0.5">📅</span>
               <div>
-                <p className="text-[#F7F7F7] font-semibold">Thursday, June 4th</p>
-                <p className="text-[#AEB9C8] text-sm">7:00 PM – 9:00 PM</p>
+                <p className="text-[#F7F7F7] font-semibold">Thursday, July 16th</p>
+                <p className="text-[#AEB9C8] text-sm">6:00 PM – 8:30 PM</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
