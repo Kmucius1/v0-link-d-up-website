@@ -24,10 +24,8 @@ export async function POST(req: NextRequest) {
     })
     return NextResponse.json({ ok: true })
   } catch (err) {
-    console.error('[admin/login] error:', err)
-    return NextResponse.json(
-      { error: 'Server error — database may be unavailable. Try again in a moment.' },
-      { status: 500 }
-    )
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[admin/login] error:', msg)
+    return NextResponse.json({ error: 'DB error', detail: msg }, { status: 500 })
   }
 }
