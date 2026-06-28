@@ -13,16 +13,24 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const res = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-    if (res.ok) {
-      window.location.href = '/admin/dashboard'
-    } else {
-      const data = await res.json()
-      setError(data.error || 'Invalid credentials')
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      if (res.ok) {
+        window.location.href = '/admin/dashboard'
+        return
+      }
+      let msg = 'Invalid email or password'
+      try {
+        const data = await res.json()
+        msg = data.error || msg
+      } catch {}
+      setError(msg)
+    } catch {
+      setError('Server error — please try again or contact support.')
     }
     setLoading(false)
   }

@@ -13,17 +13,32 @@ import {
   Settings,
   LogOut,
   Link2,
+  UserCheck,
+  UserPlus,
+  CheckSquare,
+  Megaphone,
+  MapPin,
+  Inbox,
+  Send,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const nav = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/events', label: 'Events', icon: Calendar },
+  { href: '/admin/checkin', label: 'Check-In', icon: UserCheck },
   { href: '/admin/rsvps', label: 'RSVPs', icon: ClipboardList },
+  { href: '/admin/walkins', label: 'Walk-Ins', icon: UserPlus },
   { href: '/admin/contacts', label: 'Contacts', icon: Users },
   { href: '/admin/surveys', label: 'Surveys', icon: MessageSquare },
-  { href: '/admin/campaigns', label: 'Email Campaigns', icon: Mail },
   { href: '/admin/opportunities', label: 'Sponsors & More', icon: Star },
+  { href: '/admin/sponsor-inquiries', label: 'Sponsor Inquiries', icon: Send },
+  { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
+  { href: '/admin/contact-forms', label: 'Contact Forms', icon: Inbox },
+  { href: '/admin/campaigns', label: 'Email Campaigns', icon: Mail },
+  { href: '/admin/followups', label: 'Follow-Up Tasks', icon: CheckSquare },
+  { href: '/admin/promo-tasks', label: 'Promo Tasks', icon: Megaphone },
+  { href: '/admin/outreach', label: 'Local Outreach', icon: MapPin },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 

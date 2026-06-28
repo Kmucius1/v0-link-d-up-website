@@ -33,6 +33,7 @@ model Contact {
   notes            ContactNote[]
   tags             ContactTag[]
   opportunities    Opportunity[]
+  followupTasks    FollowupTask[]
 
   @@map("contacts")
 }
@@ -58,6 +59,10 @@ model Event {
   emailLogs         EmailLog[]
   surveyResponses   SurveyResponse[]
   opportunities     Opportunity[]
+  walkIns           WalkIn[]
+  followupTasks     FollowupTask[]
+  promoTasks        PromoTask[]
+  localOutreach     LocalOutreach[]
 
   @@map("events")
 }
@@ -179,4 +184,123 @@ model EmailCampaign {
   updatedAt   DateTime  @updatedAt
 
   @@map("email_campaigns")
+}
+
+model NewsletterSignup {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+  source      String?
+  createdAt   DateTime @default(now())
+
+  @@map("newsletter_signups")
+}
+
+model ContactSubmission {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  message     String
+  subject     String?
+  source      String?
+  createdAt   DateTime @default(now())
+
+  @@map("contact_submissions")
+}
+
+model SponsorInquiry {
+  id              String   @id @default(cuid())
+  companyName     String
+  contactName     String
+  email           String
+  phone           String?
+  website         String?
+  sponsorshipType String?
+  budget          String?
+  message         String?
+  status          String   @default("new")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("sponsor_inquiries")
+}
+
+model WalkIn {
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String?
+  phone         String?
+  businessName  String?
+  instagram     String?
+  eventId       String?
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  event         Event?   @relation(fields: [eventId], references: [id])
+
+  @@map("walk_ins")
+}
+
+model FollowupTask {
+  id          String   @id @default(cuid())
+  contactId   String?
+  eventId     String?
+  title       String
+  notes       String?
+  dueDate     DateTime?
+  assignedTo  String?
+  status      String   @default("pending")
+  priority    String   @default("normal")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  contact     Contact? @relation(fields: [contactId], references: [id])
+  event       Event?   @relation(fields: [eventId], references: [id])
+
+  @@map("followup_tasks")
+}
+
+model PromoTask {
+  id          String   @id @default(cuid())
+  eventId     String?
+  platform    String
+  contentType String
+  description String
+  dueDate     DateTime?
+  assignedTo  String?
+  status      String   @default("pending")
+  postUrl     String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  event       Event?   @relation(fields: [eventId], references: [id])
+
+  @@map("promo_tasks")
+}
+
+model LocalOutreach {
+  id            String   @id @default(cuid())
+  businessName  String
+  contactName   String?
+  email         String?
+  phone         String?
+  address       String?
+  neighborhood  String?
+  outreachType  String?
+  status        String   @default("not_contacted")
+  notes         String?
+  lastContactAt DateTime?
+  eventId       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  event         Event?   @relation(fields: [eventId], references: [id])
+
+  @@map("local_outreach")
 }
