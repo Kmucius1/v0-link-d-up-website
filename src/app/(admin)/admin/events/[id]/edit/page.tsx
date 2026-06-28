@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { notFound } from 'next/navigation'
 import { EventForm } from '@/components/admin/EventForm'
 import Link from 'next/link'
@@ -6,7 +6,13 @@ import { ArrowLeft } from 'lucide-react'
 
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const event = await prisma.event.findUnique({ where: { id } })
+
+  const { data: event } = await supabaseAdmin
+    .from('events')
+    .select('*')
+    .eq('id', id)
+    .single()
+
   if (!event) notFound()
 
   return (

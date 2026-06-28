@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { sendRsvpConfirmation } from '@/lib/email'
 import { format } from 'date-fns'
 
@@ -33,62 +33,113 @@ export async function POST(req: NextRequest) {
 
     const fullName = `${firstName} ${lastName}`.trim()
 
-    const event = await prisma.event.findUnique({ where: { id: eventId } })
-    if (!event) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    // Fetch event
+    const { data: event, error: eventError } = await supabaseAdmin
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single()
+    if (eventError || !event) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
 
     // Upsert contact — deduplicate by email
-    const contact = await prisma.contact.upsert({
-      where: { email: email.toLowerCase().trim() },
-      update: {
+    const normalizedEmail = email.toLowerCase().trim()
+    const { data: existingContact } = await supabaseAdmin
+      .from('contacts')
+      .select('id, consentToEmail')
+      .eq('email', normalizedEmail)
+      .maybeSingle()
+
+    let contact
+    if (existingContact) {
+      const updateFields: Record<string, unknown> = {
         firstName,
         lastName,
         fullName,
-        phone: phone || undefined,
-        businessName: businessName || undefined,
-        roleOrIndustry: roleOrIndustry || undefined,
-        instagram: instagram || undefined,
-        linkedin: linkedin || undefined,
-        website: website || undefined,
-        city: city || undefined,
-        consentToEmail: consentToEmail ?? undefined,
-        lastRsvpAt: new Date(),
-        updatedAt: new Date(),
-      },
-      create: {
-        firstName,
-        lastName,
-        fullName,
-        email: email.toLowerCase().trim(),
-        phone: phone || null,
-        businessName: businessName || null,
-        roleOrIndustry: roleOrIndustry || null,
-        instagram: instagram || null,
-        linkedin: linkedin || null,
-        website: website || null,
-        city: city || null,
-        consentToEmail: consentToEmail ?? false,
-        contactSource: source || 'website',
-        lastRsvpAt: new Date(),
-      },
-    })
+        lastRsvpAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+      if (phone) updateFields.phone = phone
+      if (businessName) updateFields.businessName = businessName
+      if (roleOrIndustry) updateFields.roleOrIndustry = roleOrIndustry
+      if (instagram) updateFields.instagram = instagram
+      if (linkedin) updateFields.linkedin = linkedin
+      if (website) updateFields.website = website
+      if (city) updateFields.city = city
+      if (consentToEmail != null) updateFields.consentToEmail = consentToEmail
+
+      const { data, error } = await supabaseAdmin
+        .from('contacts')
+        .update(updateFields)
+        .eq('id', existingContact.id)
+        .select()
+        .single()
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      contact = data
+    } else {
+      const { data, error } = await supabaseAdmin
+        .from('contacts')
+        .insert({
+          firstName,
+          lastName,
+          fullName,
+          email: normalizedEmail,
+          phone: phone || null,
+          businessName: businessName || null,
+          roleOrIndustry: roleOrIndustry || null,
+          instagram: instagram || null,
+          linkedin: linkedin || null,
+          website: website || null,
+          city: city || null,
+          consentToEmail: consentToEmail ?? false,
+          contactSource: source || 'website',
+          lastRsvpAt: new Date().toISOString(),
+        })
+        .select()
+        .single()
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      contact = data
+    }
 
     // Upsert RSVP
-    const rsvp = await prisma.rsvp.upsert({
-      where: { contactId_eventId: { contactId: contact.id, eventId } },
-      update: {
+    const { data: existingRsvp } = await supabaseAdmin
+      .from('rsvps')
+      .select('id')
+      .eq('contactId', contact.id)
+      .eq('eventId', eventId)
+      .maybeSingle()
+
+    let rsvp
+    if (existingRsvp) {
+      const rsvpUpdate: Record<string, unknown> = {
         rsvpStatus: 'confirmed',
         numberOfGuests: numberOfGuests || 1,
-        howDidYouHear: howDidYouHear || undefined,
-        updatedAt: new Date(),
-      },
-      create: {
-        contactId: contact.id,
-        eventId,
-        rsvpStatus: 'confirmed',
-        numberOfGuests: numberOfGuests || 1,
-        howDidYouHear: howDidYouHear || null,
-      },
-    })
+        updatedAt: new Date().toISOString(),
+      }
+      if (howDidYouHear) rsvpUpdate.howDidYouHear = howDidYouHear
+
+      const { data, error } = await supabaseAdmin
+        .from('rsvps')
+        .update(rsvpUpdate)
+        .eq('id', existingRsvp.id)
+        .select()
+        .single()
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      rsvp = data
+    } else {
+      const { data, error } = await supabaseAdmin
+        .from('rsvps')
+        .insert({
+          contactId: contact.id,
+          eventId,
+          rsvpStatus: 'confirmed',
+          numberOfGuests: numberOfGuests || 1,
+          howDidYouHear: howDidYouHear || null,
+        })
+        .select()
+        .single()
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      rsvp = data
+    }
 
     // Send confirmation email
     if (contact.consentToEmail || consentToEmail) {
@@ -103,25 +154,21 @@ export async function POST(req: NextRequest) {
           address: event.address,
         })
 
-        await prisma.emailLog.create({
-          data: {
-            contactId: contact.id,
-            eventId,
-            emailType: 'confirmation',
-            subject: `You're confirmed for ${event.eventName} — LINK'D UP`,
-            status: 'sent',
-          },
+        await supabaseAdmin.from('email_logs').insert({
+          contactId: contact.id,
+          eventId,
+          emailType: 'confirmation',
+          subject: `You're confirmed for ${event.eventName} — LINK'D UP`,
+          status: 'sent',
         })
       } catch {
-        await prisma.emailLog.create({
-          data: {
-            contactId: contact.id,
-            eventId,
-            emailType: 'confirmation',
-            subject: `You're confirmed for ${event.eventName} — LINK'D UP`,
-            status: 'failed',
-            errorMessage: 'Email delivery failed',
-          },
+        await supabaseAdmin.from('email_logs').insert({
+          contactId: contact.id,
+          eventId,
+          emailType: 'confirmation',
+          subject: `You're confirmed for ${event.eventName} — LINK'D UP`,
+          status: 'failed',
+          errorMessage: 'Email delivery failed',
         })
       }
     }

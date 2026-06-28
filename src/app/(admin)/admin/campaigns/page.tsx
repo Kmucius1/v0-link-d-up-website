@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { Mail, Plus, Send } from 'lucide-react'
@@ -11,7 +11,12 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function CampaignsPage() {
-  const campaigns = await prisma.emailCampaign.findMany({ orderBy: { createdAt: 'desc' } })
+  const { data: campaigns } = await supabaseAdmin
+    .from('email_campaigns')
+    .select('*')
+    .order('createdAt', { ascending: false })
+
+  const list = campaigns ?? []
 
   const audienceOptions = [
     'All LINK\'D UP Contacts',
@@ -37,7 +42,7 @@ export default async function CampaignsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Email Campaigns</h1>
-          <p className="text-zinc-400 text-sm mt-0.5">{campaigns.length} total campaigns</p>
+          <p className="text-zinc-400 text-sm mt-0.5">{list.length} total campaigns</p>
         </div>
         <Link
           href="/admin/campaigns/new"
@@ -59,18 +64,18 @@ export default async function CampaignsPage() {
         </div>
       </div>
 
-      {campaigns.length === 0 ? (
+      {list.length === 0 ? (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
           <Mail size={32} className="text-zinc-600 mx-auto mb-3" />
           <p className="text-zinc-400 font-medium">No campaigns yet</p>
-          <p className="text-zinc-600 text-sm mt-1">Create email campaigns to reach your LINK'D UP community.</p>
+          <p className="text-zinc-600 text-sm mt-1">Create email campaigns to reach your LINK&apos;D UP community.</p>
           <Link href="/admin/campaigns/new" className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors">
             <Plus size={13} /> Create Campaign
           </Link>
         </div>
       ) : (
         <div className="space-y-3">
-          {campaigns.map((campaign) => (
+          {list.map((campaign) => (
             <div key={campaign.id} className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 transition-all">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">

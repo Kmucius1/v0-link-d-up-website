@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminAuth } from '@/lib/admin-auth'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
@@ -11,13 +11,22 @@ export async function POST(req: NextRequest) {
   if (!email || !password || password.length < 8) {
     return NextResponse.json({ error: 'Email and password (min 8 chars) required.' }, { status: 400 })
   }
-  const existing = await prisma.adminUser.findUnique({ where: { email } })
+
+  const { data: existing } = await supabaseAdmin
+    .from('admin_users')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
   if (existing) {
     return NextResponse.json({ error: 'An admin with that email already exists.' }, { status: 409 })
   }
+
   const hashed = await bcrypt.hash(password, 12)
-  const admin = await prisma.adminUser.create({
-    data: { email, password: hashed, name: name || null },
-  })
+  const { data: admin, error } = await supabaseAdmin
+    .from('admin_users')
+    .insert({ email, password: hashed, name: name || null })
+    .select()
+    .single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true, id: admin.id, email: admin.email })
 }

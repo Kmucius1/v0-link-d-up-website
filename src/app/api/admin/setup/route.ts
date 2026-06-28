@@ -1,19 +1,18 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import bcrypt from 'bcryptjs'
 
-// One-time setup endpoint — creates the first admin if none exists
 export async function POST(req: NextRequest) {
-  const existing = await prisma.adminUser.count()
-  if (existing > 0) {
+  const { data: existing } = await supabaseAdmin.from('admin_users').select('id').limit(1)
+  if (existing && existing.length > 0) {
     return NextResponse.json({ error: 'Admin already exists. Use the invite flow to add more admins.' }, { status: 409 })
   }
 
   const { email, password, name, setupKey } = await req.json()
 
-  if (setupKey !== process.env.ADMIN_SETUP_KEY) {
+  if (setupKey !== (process.env.ADMIN_SETUP_KEY ?? '')) {
     return NextResponse.json({ error: 'Invalid setup key.' }, { status: 403 })
   }
   if (!email || !password || password.length < 8) {
@@ -21,9 +20,12 @@ export async function POST(req: NextRequest) {
   }
 
   const hashed = await bcrypt.hash(password, 12)
-  const admin = await prisma.adminUser.create({
-    data: { email, password: hashed, name: name || null },
-  })
+  const { data, error } = await supabaseAdmin
+    .from('admin_users')
+    .insert({ email, password: hashed, name: name || null })
+    .select()
+    .single()
 
-  return NextResponse.json({ ok: true, id: admin.id, email: admin.email })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true, id: data.id, email: data.email })
 }

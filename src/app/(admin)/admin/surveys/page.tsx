@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { MessageSquare, Star } from 'lucide-react'
@@ -12,26 +12,27 @@ export default async function SurveysPage({
   const pageNum = parseInt(params.page || '1')
   const perPage = 30
 
-  const events = await prisma.event.findMany({
-    orderBy: { eventDate: 'desc' },
-    select: { id: true, eventName: true },
-  })
+  const { data: events } = await supabaseAdmin
+    .from('events')
+    .select('id, eventName')
+    .order('eventDate', { ascending: false })
 
-  const where = params.event ? { eventId: params.event } : {}
+  let query = supabaseAdmin
+    .from('survey_responses')
+    .select('*, contacts(id, fullName, email), events(id, eventName)', { count: 'exact' })
+    .order('createdAt', { ascending: false })
+    .range((pageNum - 1) * perPage, pageNum * perPage - 1)
 
-  const [surveys, total] = await Promise.all([
-    prisma.surveyResponse.findMany({
-      where,
-      orderBy: { submittedAt: 'desc' },
-      skip: (pageNum - 1) * perPage,
-      take: perPage,
-      include: {
-        contact: { select: { id: true, fullName: true, email: true } },
-        event: { select: { id: true, eventName: true } },
-      },
-    }),
-    prisma.surveyResponse.count({ where }),
-  ])
+  if (params.event) query = query.eq('eventId', params.event)
+
+  const { data: rawSurveys, count } = await query
+  const total = count ?? 0
+
+  const surveys = (rawSurveys ?? []).map((s) => ({
+    ...s,
+    contact: s.contacts as { id: string; fullName: string; email: string },
+    event: s.events as { id: string; eventName: string } | null,
+  }))
 
   const totalPages = Math.ceil(total / perPage)
 
@@ -49,7 +50,7 @@ export default async function SurveysPage({
         <select name="event" defaultValue={params.event || ''}
           className="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-zinc-300 text-sm focus:outline-none focus:border-violet-500">
           <option value="">All Events</option>
-          {events.map((e) => <option key={e.id} value={e.id}>{e.eventName}</option>)}
+          {(events ?? []).map((e) => <option key={e.id} value={e.id}>{e.eventName}</option>)}
         </select>
         <button type="submit" className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors">Filter</button>
         {params.event && <Link href="/admin/surveys" className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm font-medium rounded-lg transition-colors">Clear</Link>}
@@ -79,7 +80,7 @@ export default async function SurveysPage({
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-500 mt-0.5">{survey.contact.email} · Submitted {format(survey.submittedAt, 'MMM d, yyyy')}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{survey.contact.email} · Submitted {format(survey.submittedAt ?? survey.createdAt, 'MMM d, yyyy')}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       {survey.rating && Array.from({ length: 5 }).map((_, i) => (
@@ -92,9 +93,9 @@ export default async function SurveysPage({
                     <p className="text-sm text-zinc-300 bg-zinc-800/50 rounded-lg p-3 mb-3">{survey.keyFeedback}</p>
                   )}
 
-                  {survey.interestTags.length > 0 && (
+                  {survey.interestTags && survey.interestTags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      {survey.interestTags.map((tag) => (
+                      {survey.interestTags.map((tag: string) => (
                         <span key={tag} className="text-xs px-2 py-0.5 bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400 rounded-full">{tag}</span>
                       ))}
                     </div>

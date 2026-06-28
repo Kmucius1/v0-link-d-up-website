@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import Link from 'next/link'
@@ -15,25 +15,36 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const event = await prisma.event.findUnique({
-    where: { id },
-    include: {
-      rsvps: {
-        include: { contact: true },
-        orderBy: { createdAt: 'desc' },
-      },
-      surveyResponses: {
-        include: { contact: true },
-        orderBy: { submittedAt: 'desc' },
-      },
-      _count: { select: { rsvps: true, surveyResponses: true } },
+
+  const { data: rawEvent } = await supabaseAdmin
+    .from('events')
+    .select(`
+      *,
+      rsvps(*, contacts(*)),
+      survey_responses(*, contacts(*))
+    `)
+    .eq('id', id)
+    .single()
+
+  if (!rawEvent) notFound()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rsvps = ((rawEvent as any).rsvps ?? []).map((r: any) => ({ ...r, contact: r.contacts }))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const surveyResponses = ((rawEvent as any).survey_responses ?? []).map((s: any) => ({ ...s, contact: s.contacts }))
+
+  const event = {
+    ...rawEvent,
+    rsvps,
+    surveyResponses,
+    _count: {
+      rsvps: rsvps.length,
+      surveyResponses: surveyResponses.length,
     },
-  })
+  }
 
-  if (!event) notFound()
-
-  const attended = event.rsvps.filter((r) => r.attended).length
-  const checkedIn = event.rsvps.filter((r) => r.checkedIn).length
+  const attended = rsvps.filter((r: any) => r.attended).length
+  const checkedIn = rsvps.filter((r: any) => r.checkedIn).length
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">

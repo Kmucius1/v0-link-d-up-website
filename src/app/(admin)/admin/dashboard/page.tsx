@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/prisma'
-import { format, subDays, startOfWeek } from 'date-fns'
+import { supabaseAdmin } from '@/lib/supabase-admin'
+import { format, subDays } from 'date-fns'
 import { Users, ClipboardList, Calendar, MessageSquare, TrendingUp, Star, Mic, Palette, Music, Handshake } from 'lucide-react'
 import Link from 'next/link'
 
@@ -7,50 +7,68 @@ async function getDashboardStats() {
   const weekAgo = subDays(new Date(), 7)
 
   const [
-    totalContacts,
-    totalRsvps,
-    totalSurveys,
-    newContactsThisWeek,
-    upcomingEvents,
-    sponsorCount,
-    vendorCount,
-    speakerCount,
-    musicianCount,
-    artistCount,
-    collaboratorCount,
-    industryGroups,
+    { count: totalContacts },
+    { count: totalRsvps },
+    { count: totalSurveys },
+    { count: newContactsThisWeek },
+    { data: rawUpcoming },
+    { count: sponsorCount },
+    { count: vendorCount },
+    { count: speakerCount },
+    { count: musicianCount },
+    { count: artistCount },
+    { count: collaboratorCount },
+    { data: roleData },
   ] = await Promise.all([
-    prisma.contact.count(),
-    prisma.rsvp.count(),
-    prisma.surveyResponse.count(),
-    prisma.contact.count({ where: { createdAt: { gte: weekAgo } } }),
-    prisma.event.findMany({
-      where: { eventDate: { gte: new Date() }, status: 'live' },
-      orderBy: { eventDate: 'asc' },
-      take: 3,
-      include: { _count: { select: { rsvps: true } } },
-    }),
-    prisma.opportunity.count({ where: { opportunityType: 'Sponsor' } }),
-    prisma.opportunity.count({ where: { opportunityType: 'Vendor' } }),
-    prisma.opportunity.count({ where: { opportunityType: 'Speaker' } }),
-    prisma.opportunity.count({ where: { opportunityType: 'Musician / Performer' } }),
-    prisma.opportunity.count({ where: { opportunityType: 'Artist' } }),
-    prisma.opportunity.count({ where: { opportunityType: 'Collaborator' } }),
-    prisma.contact.groupBy({ by: ['roleOrIndustry'], _count: true, orderBy: { _count: { roleOrIndustry: 'desc' } }, take: 6 }),
+    supabaseAdmin.from('contacts').select('id', { count: 'exact', head: true }),
+    supabaseAdmin.from('rsvps').select('id', { count: 'exact', head: true }),
+    supabaseAdmin.from('survey_responses').select('id', { count: 'exact', head: true }),
+    supabaseAdmin.from('contacts').select('id', { count: 'exact', head: true }).gte('createdAt', weekAgo.toISOString()),
+    supabaseAdmin
+      .from('events')
+      .select('*, rsvps(count)')
+      .gte('eventDate', new Date().toISOString())
+      .eq('status', 'live')
+      .order('eventDate', { ascending: true })
+      .limit(3),
+    supabaseAdmin.from('opportunities').select('id', { count: 'exact', head: true }).eq('opportunityType', 'Sponsor'),
+    supabaseAdmin.from('opportunities').select('id', { count: 'exact', head: true }).eq('opportunityType', 'Vendor'),
+    supabaseAdmin.from('opportunities').select('id', { count: 'exact', head: true }).eq('opportunityType', 'Speaker'),
+    supabaseAdmin.from('opportunities').select('id', { count: 'exact', head: true }).eq('opportunityType', 'Musician / Performer'),
+    supabaseAdmin.from('opportunities').select('id', { count: 'exact', head: true }).eq('opportunityType', 'Artist'),
+    supabaseAdmin.from('opportunities').select('id', { count: 'exact', head: true }).eq('opportunityType', 'Collaborator'),
+    supabaseAdmin.from('contacts').select('roleOrIndustry').not('roleOrIndustry', 'is', null),
   ])
 
+  const upcomingEvents = (rawUpcoming ?? []).map((e) => ({
+    ...e,
+    _count: { rsvps: (e.rsvps as Array<{ count: number }>)?.[0]?.count ?? 0 },
+  }))
+
+  // Group roleOrIndustry in JS since Supabase has no direct groupBy
+  const roleMap = new Map<string, number>()
+  for (const c of roleData ?? []) {
+    if (c.roleOrIndustry) {
+      roleMap.set(c.roleOrIndustry, (roleMap.get(c.roleOrIndustry) ?? 0) + 1)
+    }
+  }
+  const industryGroups = Array.from(roleMap.entries())
+    .map(([roleOrIndustry, _count]) => ({ roleOrIndustry, _count }))
+    .sort((a, b) => b._count - a._count)
+    .slice(0, 6)
+
   return {
-    totalContacts,
-    totalRsvps,
-    totalSurveys,
-    newContactsThisWeek,
+    totalContacts: totalContacts ?? 0,
+    totalRsvps: totalRsvps ?? 0,
+    totalSurveys: totalSurveys ?? 0,
+    newContactsThisWeek: newContactsThisWeek ?? 0,
     upcomingEvents,
-    sponsorCount,
-    vendorCount,
-    speakerCount,
-    musicianCount,
-    artistCount,
-    collaboratorCount,
+    sponsorCount: sponsorCount ?? 0,
+    vendorCount: vendorCount ?? 0,
+    speakerCount: speakerCount ?? 0,
+    musicianCount: musicianCount ?? 0,
+    artistCount: artistCount ?? 0,
+    collaboratorCount: collaboratorCount ?? 0,
     industryGroups,
   }
 }
@@ -78,7 +96,7 @@ export default async function DashboardPage() {
     <div className="p-6 space-y-8 max-w-7xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">LINK'D UP Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white">LINK&apos;D UP Dashboard</h1>
         <p className="text-zinc-400 text-sm mt-1">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
       </div>
 

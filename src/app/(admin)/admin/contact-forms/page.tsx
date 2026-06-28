@@ -1,25 +1,30 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import { MessageSquare } from 'lucide-react'
 
 export default async function ContactFormsPage() {
-  const submissions = await prisma.contactSubmission.findMany({ orderBy: { createdAt: 'desc' } })
+  const { data: submissions } = await supabaseAdmin
+    .from('contact_submissions')
+    .select('*')
+    .order('createdAt', { ascending: false })
+
+  const list = submissions ?? []
 
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold text-white">Contact Forms</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">{submissions.length.toLocaleString()} submissions</p>
+        <p className="text-zinc-400 text-sm mt-0.5">{list.length.toLocaleString()} submissions</p>
       </div>
 
-      {submissions.length === 0 ? (
+      {list.length === 0 ? (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
           <MessageSquare size={32} className="text-zinc-600 mx-auto mb-3" />
           <p className="text-zinc-400">No contact form submissions yet.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {submissions.map((s) => (
+          {list.map((s) => (
             <div key={s.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>

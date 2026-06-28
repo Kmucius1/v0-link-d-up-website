@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { ClipboardList, CheckCircle, XCircle } from 'lucide-react'
@@ -17,27 +17,30 @@ export default async function RSVPsPage({
   const pageNum = parseInt(params.page || '1')
   const perPage = 50
 
-  const events = await prisma.event.findMany({ orderBy: { eventDate: 'desc' }, select: { id: true, eventName: true, eventDate: true } })
+  const { data: events } = await supabaseAdmin
+    .from('events')
+    .select('id, eventName, eventDate')
+    .order('eventDate', { ascending: false })
 
-  const where: Record<string, unknown> = {}
-  if (params.event) where.eventId = params.event
-  if (params.status) where.rsvpStatus = params.status
-  if (params.attended === 'yes') where.attended = true
-  if (params.attended === 'no') where.attended = false
+  let query = supabaseAdmin
+    .from('rsvps')
+    .select('*, contacts(*), events(id, eventName, eventDate)', { count: 'exact' })
+    .order('createdAt', { ascending: false })
+    .range((pageNum - 1) * perPage, pageNum * perPage - 1)
 
-  const [rsvps, total] = await Promise.all([
-    prisma.rsvp.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip: (pageNum - 1) * perPage,
-      take: perPage,
-      include: {
-        contact: true,
-        event: { select: { id: true, eventName: true, eventDate: true } },
-      },
-    }),
-    prisma.rsvp.count({ where }),
-  ])
+  if (params.event) query = query.eq('eventId', params.event)
+  if (params.status) query = query.eq('rsvpStatus', params.status)
+  if (params.attended === 'yes') query = query.eq('attended', true)
+  if (params.attended === 'no') query = query.eq('attended', false)
+
+  const { data: rawRsvps, count } = await query
+  const total = count ?? 0
+
+  const rsvps = (rawRsvps ?? []).map((r) => ({
+    ...r,
+    contact: r.contacts as { fullName: string; email: string; businessName: string | null },
+    event: r.events as { id: string; eventName: string; eventDate: string },
+  }))
 
   const totalPages = Math.ceil(total / perPage)
 
@@ -69,7 +72,7 @@ export default async function RSVPsPage({
           <select name="event" defaultValue={params.event || ''}
             className="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-zinc-300 text-sm focus:outline-none focus:border-violet-500">
             <option value="">All Events</option>
-            {events.map((e) => (
+            {(events ?? []).map((e) => (
               <option key={e.id} value={e.id}>{e.eventName} ({format(e.eventDate, 'MMM d, yyyy')})</option>
             ))}
           </select>

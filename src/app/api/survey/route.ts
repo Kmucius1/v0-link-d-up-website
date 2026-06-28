@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,9 +22,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const [survey] = await Promise.all([
-      prisma.surveyResponse.create({
-        data: {
+    const [surveyResult, contactResult] = await Promise.all([
+      supabaseAdmin
+        .from('survey_responses')
+        .insert({
           contactId,
           eventId: eventId || null,
           surveyTitle,
@@ -33,15 +34,19 @@ export async function POST(req: NextRequest) {
           interestTags: interestTags || [],
           keyFeedback: keyFeedback || null,
           suggestedFollowUp: suggestedFollowUp || null,
-        },
-      }),
-      prisma.contact.update({
-        where: { id: contactId },
-        data: { lastSurveyAt: new Date() },
-      }),
+        })
+        .select()
+        .single(),
+      supabaseAdmin
+        .from('contacts')
+        .update({ lastSurveyAt: new Date().toISOString() })
+        .eq('id', contactId),
     ])
 
-    return NextResponse.json(survey, { status: 201 })
+    if (surveyResult.error) return NextResponse.json({ error: surveyResult.error.message }, { status: 500 })
+    if (contactResult.error) return NextResponse.json({ error: contactResult.error.message }, { status: 500 })
+
+    return NextResponse.json(surveyResult.data, { status: 201 })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Survey submission failed'
     return NextResponse.json({ error: msg }, { status: 500 })

@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { Users, Search } from 'lucide-react'
@@ -12,27 +12,27 @@ export default async function ContactsPage({
   const pageNum = parseInt(page || '1')
   const perPage = 50
 
-  const where = q
-    ? {
-        OR: [
-          { fullName: { contains: q, mode: 'insensitive' as const } },
-          { email: { contains: q, mode: 'insensitive' as const } },
-          { businessName: { contains: q, mode: 'insensitive' as const } },
-          { roleOrIndustry: { contains: q, mode: 'insensitive' as const } },
-        ],
-      }
-    : {}
+  let query = supabaseAdmin
+    .from('contacts')
+    .select('*, rsvps(count)', { count: 'exact' })
+    .order('createdAt', { ascending: false })
+    .range((pageNum - 1) * perPage, pageNum * perPage - 1)
 
-  const [contacts, total] = await Promise.all([
-    prisma.contact.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip: (pageNum - 1) * perPage,
-      take: perPage,
-      include: { _count: { select: { rsvps: true, surveyResponses: true, opportunities: true } } },
-    }),
-    prisma.contact.count({ where }),
-  ])
+  if (q) {
+    query = query.or(
+      `fullName.ilike.%${q}%,email.ilike.%${q}%,businessName.ilike.%${q}%,roleOrIndustry.ilike.%${q}%`
+    )
+  }
+
+  const { data: rawContacts, count } = await query
+  const total = count ?? 0
+
+  const contacts = (rawContacts ?? []).map((c) => ({
+    ...c,
+    _count: {
+      rsvps: (c.rsvps as Array<{ count: number }>)?.[0]?.count ?? 0,
+    },
+  }))
 
   const totalPages = Math.ceil(total / perPage)
 

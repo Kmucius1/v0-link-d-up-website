@@ -1,15 +1,16 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(req: NextRequest) {
   const { contactId } = await req.json()
   if (!contactId) return NextResponse.json({ error: 'Missing contactId' }, { status: 400 })
 
-  await db.contact.update({
-    where: { id: contactId },
-    data: { unsubscribed: true, consentToEmail: false },
-  })
+  const { error } = await supabaseAdmin
+    .from('contacts')
+    .update({ unsubscribed: true, consentToEmail: false })
+    .eq('id', contactId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

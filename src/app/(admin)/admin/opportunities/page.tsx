@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
@@ -22,31 +22,36 @@ export default async function OpportunitiesPage({
 }) {
   const params = await searchParams
 
-  const where: Record<string, unknown> = {}
-  if (params.type) where.opportunityType = params.type
-  if (params.status) where.status = params.status
+  let query = supabaseAdmin
+    .from('opportunities')
+    .select('*, contacts(id, fullName, email, businessName, roleOrIndustry), events(id, eventName)')
+    .order('createdAt', { ascending: false })
 
-  const opportunities = await prisma.opportunity.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      contact: { select: { id: true, fullName: true, email: true, businessName: true, roleOrIndustry: true } },
-      event: { select: { id: true, eventName: true } },
-    },
-  })
+  if (params.type) query = query.eq('opportunityType', params.type)
+  if (params.status) query = query.eq('status', params.status)
+
+  const { data: rawOpps } = await query
+  const opportunities = (rawOpps ?? []).map((opp) => ({
+    ...opp,
+    contact: opp.contacts as { id: string; fullName: string; email: string; businessName: string | null; roleOrIndustry: string | null } | null,
+    event: opp.events as { id: string; eventName: string } | null,
+  }))
 
   const counts = await Promise.all(
-    OPPORTUNITY_TYPES.map(async (type) => ({
-      type,
-      count: await prisma.opportunity.count({ where: { opportunityType: type } }),
-    }))
+    OPPORTUNITY_TYPES.map(async (type) => {
+      const { count } = await supabaseAdmin
+        .from('opportunities')
+        .select('id', { count: 'exact', head: true })
+        .eq('opportunityType', type)
+      return { type, count: count ?? 0 }
+    })
   )
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold text-white">Sponsors, Vendors & More</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">Track community members interested in participating with LINK'D UP</p>
+        <p className="text-zinc-400 text-sm mt-0.5">Track community members interested in participating with LINK&apos;D UP</p>
       </div>
 
       {/* Type breakdown */}
@@ -108,10 +113,10 @@ export default async function OpportunitiesPage({
               {opportunities.map((opp) => (
                 <tr key={opp.id} className="hover:bg-zinc-800/20 transition-colors">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/contacts/${opp.contact.id}`} className="group">
-                      <p className="font-medium text-zinc-200 group-hover:text-violet-300 transition-colors">{opp.contact.fullName}</p>
-                      {opp.contact.businessName && <p className="text-xs text-zinc-600">{opp.contact.businessName}</p>}
-                      {opp.contact.roleOrIndustry && <p className="text-xs text-zinc-600">{opp.contact.roleOrIndustry}</p>}
+                    <Link href={`/admin/contacts/${opp.contact?.id}`} className="group">
+                      <p className="font-medium text-zinc-200 group-hover:text-violet-300 transition-colors">{opp.contact?.fullName}</p>
+                      {opp.contact?.businessName && <p className="text-xs text-zinc-600">{opp.contact.businessName}</p>}
+                      {opp.contact?.roleOrIndustry && <p className="text-xs text-zinc-600">{opp.contact.roleOrIndustry}</p>}
                     </Link>
                   </td>
                   <td className="px-4 py-3">

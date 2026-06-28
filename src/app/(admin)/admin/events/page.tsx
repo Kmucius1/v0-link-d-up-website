@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { Calendar, Plus, MapPin, Users, ExternalLink } from 'lucide-react'
@@ -11,10 +11,18 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function EventsPage() {
-  const events = await prisma.event.findMany({
-    orderBy: { eventDate: 'desc' },
-    include: { _count: { select: { rsvps: true, surveyResponses: true } } },
-  })
+  const { data: rawEvents } = await supabaseAdmin
+    .from('events')
+    .select('*, rsvps(count), survey_responses(count)')
+    .order('eventDate', { ascending: false })
+
+  const events = (rawEvents ?? []).map((e) => ({
+    ...e,
+    _count: {
+      rsvps: (e.rsvps as Array<{ count: number }>)?.[0]?.count ?? 0,
+      surveyResponses: (e.survey_responses as Array<{ count: number }>)?.[0]?.count ?? 0,
+    },
+  }))
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
@@ -36,7 +44,7 @@ export default async function EventsPage() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
           <Calendar size={32} className="text-zinc-600 mx-auto mb-3" />
           <p className="text-zinc-400 font-medium">No events yet</p>
-          <p className="text-zinc-600 text-sm mt-1">Create your first LINK'D UP event to get started.</p>
+          <p className="text-zinc-600 text-sm mt-1">Create your first LINK&apos;D UP event to get started.</p>
           <Link href="/admin/events/new" className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors">
             <Plus size={13} /> Create Event
           </Link>
