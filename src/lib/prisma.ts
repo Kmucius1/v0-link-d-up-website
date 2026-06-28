@@ -5,7 +5,8 @@ import { Pool } from 'pg'
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
 
 function createPrismaClient(): PrismaClient {
-  const raw = process.env.DATABASE_URL ?? 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
+  // DATABASE_URL may be set to empty string in Vercel; fall back to POSTGRES_PRISMA_URL
+  const raw = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
 
   // pg v8 treats sslmode=require as verify-full, which fails on Supabase's cert chain.
   // Strip all ssl/pooler params from the URL and rely on the Pool's explicit ssl config.
