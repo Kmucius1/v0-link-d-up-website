@@ -7,9 +7,8 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefi
 function createPrismaClient(): PrismaClient {
   const raw = process.env.DATABASE_URL ?? 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
 
-  // Strip sslmode from the URL — we set SSL config explicitly on the Pool
-  // so that sslmode=require (which pg v8 treats as verify-full) doesn't
-  // override rejectUnauthorized:false and cause self-signed cert errors on Supabase
+  // pg v8 treats sslmode=require as verify-full, which fails on Supabase's cert chain.
+  // Strip all ssl/pooler params from the URL and rely on the Pool's explicit ssl config.
   const connectionString = raw
     .replace(/[?&]sslmode=[^&]*/g, '')
     .replace(/[?&]pgbouncer=[^&]*/g, '')
@@ -21,7 +20,7 @@ function createPrismaClient(): PrismaClient {
   const pool = new Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
-    max: 5,
+    max: 3,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
   })
