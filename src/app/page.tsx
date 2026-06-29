@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import NewsletterForm from '@/components/NewsletterForm'
 
 const FB_EVENT = 'https://facebook.com/events/s/linkd-up-clearwater-fl/1626917025046995/'
 const MAPS = 'https://www.google.com/maps/place/The+Ring+Clearwater+FL'
@@ -201,6 +202,14 @@ export default function Home() {
             Follow on Facebook
           </a>
         </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="max-w-3xl mx-auto px-6 py-20 border-t border-[#7F90A8]/10 text-center">
+        <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.25em] uppercase mb-4">Stay Connected</p>
+        <h2 className="text-3xl font-bold text-[#F7F7F7] mb-3">Get Notified About Future Events</h2>
+        <p className="text-[#AEB9C8] mb-8">No spam. Just announcements when the next event drops.</p>
+        <NewsletterForm />
       </section>
 
       {/* FAQ */}

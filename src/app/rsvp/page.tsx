@@ -17,8 +17,6 @@ const howDidYouHearOptions = [
   'LinkedIn', 'DRYP Digital', 'Google Search', 'Other',
 ]
 
-const DEFAULT_EVENT_ID = process.env.NEXT_PUBLIC_DEFAULT_EVENT_ID || ''
-
 export default function RsvpPage() {
   const router = useRouter()
   const [form, setForm] = useState({
@@ -27,19 +25,22 @@ export default function RsvpPage() {
     linkedin: '', website: '', numberOfGuests: '1',
     howDidYouHear: '', consentToEmail: false,
   })
-  const [eventId, setEventId] = useState(DEFAULT_EVENT_ID)
+  const [eventId, setEventId] = useState('')
+  const [eventDetails, setEventDetails] = useState<{ eventName: string; eventDate: string; startTime: string; endTime: string; locationName: string; address: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Fetch the active event if no default set
-    if (!eventId) {
-      fetch('/api/events/active')
-        .then(r => r.json())
-        .then(d => { if (d.id) setEventId(d.id) })
-        .catch(() => {})
-    }
-  }, [eventId])
+    fetch('/api/events/active')
+      .then(r => r.json())
+      .then(d => {
+        if (d.id) {
+          setEventId(d.id)
+          setEventDetails(d)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   function set(field: string, value: string | boolean) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -91,16 +92,26 @@ export default function RsvpPage() {
       <div className="max-w-2xl mx-auto px-6 py-12">
         {/* Hero */}
         <div className="mb-10">
-          <div className="inline-block bg-[#7F90A8]/10 text-[#7F90A8] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
-            JULY 16TH · THE RING WORKSPACE
-          </div>
+          {eventDetails ? (
+            <div className="inline-block bg-[#7F90A8]/10 text-[#7F90A8] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
+              {new Date(eventDetails.eventDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }).toUpperCase()} · {eventDetails.locationName.toUpperCase()}
+            </div>
+          ) : (
+            <div className="inline-block bg-[#7F90A8]/10 text-[#7F90A8] text-xs font-bold tracking-[0.2em] px-4 py-2 rounded-full mb-6">
+              UPCOMING EVENT
+            </div>
+          )}
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-3">
-            RSVP for<br /><span className="text-[#7F90A8]">LINK'D UP</span>
+            RSVP for<br /><span className="text-[#7F90A8]">LINK&apos;D UP</span>
           </h1>
-          <p className="text-[#AEB9C8] text-lg leading-relaxed">
-            Thursday, July 16th · 6:00 PM – 8:30 PM<br />
-            The Ring Workspace · 600 Cleveland St, Clearwater, FL
-          </p>
+          {eventDetails ? (
+            <p className="text-[#AEB9C8] text-lg leading-relaxed">
+              {new Date(eventDetails.eventDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} · {eventDetails.startTime} – {eventDetails.endTime}<br />
+              {eventDetails.locationName} · {eventDetails.address}
+            </p>
+          ) : (
+            <p className="text-[#AEB9C8] text-lg leading-relaxed">Loading event details...</p>
+          )}
         </div>
 
         {/* Form */}
