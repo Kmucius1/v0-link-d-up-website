@@ -104,6 +104,23 @@ export default function SettingsPage() {
         </form>
       </div>
 
+      {/* Invite Code */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
+        <div>
+          <h2 className="font-semibold text-white">Invite Code</h2>
+          <p className="text-zinc-400 text-xs mt-0.5">Share this with anyone you want to give admin access. They&apos;ll use it on the Sign Up tab of the login page.</p>
+        </div>
+        <div className="flex items-center gap-3 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3">
+          <code className="text-violet-300 text-sm font-mono flex-1 select-all">linkdup-admin</code>
+          <button
+            onClick={() => navigator.clipboard.writeText('linkdup-admin')}
+            className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors shrink-0"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+
       {/* Info */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
         <h2 className="font-semibold text-white">System Info</h2>
