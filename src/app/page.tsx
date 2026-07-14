@@ -62,31 +62,32 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20">
-        <div className="absolute inset-0 z-0">
-          <Image src="/images/hero-banner.png" alt="Link'd Up" fill className="object-cover opacity-40" priority />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-[#050505]/20" />
+      <section className="pt-20">
+        <div className="relative w-full aspect-[1672/941]">
+          <Image src="/images/hero-banner.png" alt="Link'd Up" fill className="object-cover" priority />
         </div>
-        <div className="relative z-10 max-w-4xl">
-          <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.25em] uppercase mb-6">Where the Creative World Meets Business</p>
-          <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-tight mb-6 text-[#F7F7F7]">
-            More Than<br />Networking
-          </h1>
-          <p className="text-lg sm:text-xl text-[#AEB9C8] max-w-2xl mx-auto leading-relaxed mb-10">
-            Link&apos;d Up is where the creative world and business world come together. Built for the people creating culture, making moves, and building real things.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/rsvp" className="bg-[#7F90A8] hover:bg-[#AEB9C8] text-[#050505] font-semibold px-8 py-4 rounded-full text-base transition-colors">
-              RSVP Now — It&apos;s Free
-            </Link>
-            <a href={FB_EVENT} target="_blank" rel="noopener noreferrer" className="border border-[#7F90A8]/40 text-[#AEB9C8] hover:border-[#7F90A8] hover:text-[#F7F7F7] font-medium px-8 py-4 rounded-full text-base transition-colors">
-              View Facebook Event
-            </a>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4 mt-10 text-sm text-[#AEB9C8]">
-            {['Meet your next collaborator', 'Meet your next client', 'Meet your next creative partner', 'Meet your next referral source'].map(t => (
-              <span key={t} className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#7F90A8] inline-block" />{t}</span>
-            ))}
+        <div className="flex flex-col items-center justify-center text-center px-6 py-20">
+          <div className="max-w-4xl">
+            <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.25em] uppercase mb-6">Where the Creative World Meets Business</p>
+            <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-tight mb-6 text-[#F7F7F7]">
+              More Than<br />Networking
+            </h1>
+            <p className="text-lg sm:text-xl text-[#AEB9C8] max-w-2xl mx-auto leading-relaxed mb-10">
+              Link&apos;d Up is where the creative world and business world come together. Built for the people creating culture, making moves, and building real things.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/rsvp" className="bg-[#7F90A8] hover:bg-[#AEB9C8] text-[#050505] font-semibold px-8 py-4 rounded-full text-base transition-colors">
+                RSVP Now — It&apos;s Free
+              </Link>
+              <a href={FB_EVENT} target="_blank" rel="noopener noreferrer" className="border border-[#7F90A8]/40 text-[#AEB9C8] hover:border-[#7F90A8] hover:text-[#F7F7F7] font-medium px-8 py-4 rounded-full text-base transition-colors">
+                View Facebook Event
+              </a>
+            </div>
+            <div className="flex flex-wrap justify-center gap-4 mt-10 text-sm text-[#AEB9C8]">
+              {['Meet your next collaborator', 'Meet your next client', 'Meet your next creative partner', 'Meet your next referral source'].map(t => (
+                <span key={t} className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#7F90A8] inline-block" />{t}</span>
+              ))}
+            </div>
           </div>
         </div>
       </section>
