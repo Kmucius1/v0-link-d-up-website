@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     // Send confirmation email
     if (contact.consentToEmail || consentToEmail) {
       try {
-        await sendRsvpConfirmation({
+        const { error: sendError } = await sendRsvpConfirmation({
           to: contact.email,
           name: firstName,
           eventName: event.eventName,
@@ -155,6 +155,7 @@ export async function POST(req: NextRequest) {
           locationName: event.locationName,
           address: event.address,
         })
+        if (sendError) throw new Error(sendError.message)
 
         await supabaseAdmin.from('email_logs').insert({
           id: crypto.randomUUID(),
@@ -164,7 +165,7 @@ export async function POST(req: NextRequest) {
           subject: `You're confirmed for ${event.eventName} — LINK'D UP`,
           status: 'sent',
         })
-      } catch {
+      } catch (sendErr) {
         await supabaseAdmin.from('email_logs').insert({
           id: crypto.randomUUID(),
           contactId: contact.id,
@@ -172,7 +173,7 @@ export async function POST(req: NextRequest) {
           emailType: 'confirmation',
           subject: `You're confirmed for ${event.eventName} — LINK'D UP`,
           status: 'failed',
-          errorMessage: 'Email delivery failed',
+          errorMessage: sendErr instanceof Error ? sendErr.message : 'Email delivery failed',
         })
       }
     }
