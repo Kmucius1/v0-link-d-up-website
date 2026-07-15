@@ -126,3 +126,47 @@ export async function sendSurveyRequest({
     `.trim(),
   })
 }
+
+export async function sendSurveyThankYou({
+  to,
+  name,
+  eventName,
+}: {
+  to: string
+  name: string
+  eventName?: string
+}) {
+  return getResend().emails.send({
+    from: getFrom(),
+    to,
+    subject: `Thank you! — LINK'D UP`,
+    html: `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:40px auto;background:#111;border-radius:16px;overflow:hidden;border:1px solid #222;">
+    <div style="background:#000;">
+      <img src="https://www.linkdup.club/images/hero-banner.png" alt="LINK'D UP" width="560" style="width:100%;max-width:560px;height:auto;display:block;" />
+    </div>
+    <div style="padding:36px 32px;">
+      <p style="color:#e2e8f0;font-size:16px;margin:0 0 24px;">Hey ${name} 👋</p>
+      <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 20px;">
+        Thank you for taking the time to share your feedback${eventName ? ` on <strong style="color:#c084fc;">${eventName}</strong>` : ''} — it genuinely helps us make every future LINK'D UP event better.
+      </p>
+      <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 20px;">
+        We appreciate you coming out and supporting this community. Nights like this only work because people like you show up ready to connect, create, and build.
+      </p>
+      <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 28px;">
+        We can't wait to see you at the next one. Here's to continuing to build this thing together.
+      </p>
+      <p style="color:#e2e8f0;font-size:15px;margin:0;">With gratitude,<br /><strong style="color:#c084fc;">The LINK'D UP Team</strong></p>
+    </div>
+    <div style="padding:20px 32px;border-top:1px solid #1e1e1e;text-align:center;">
+      <p style="color:#334155;font-size:12px;margin:0;">LINK'D UP by DRYP Digital · <a href="https://www.linkdup.club" style="color:#7c3aed;text-decoration:none;">linkdup.club</a></p>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim(),
+  })
+}
