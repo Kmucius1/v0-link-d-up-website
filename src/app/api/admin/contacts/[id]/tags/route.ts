@@ -9,7 +9,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data: record, error } = await supabaseAdmin
     .from('contact_tags')
-    .insert({ contactId: id, tag })
+    .insert({ id: crypto.randomUUID(), contactId: id, tag })
     .select()
     .single()
   if (error) {

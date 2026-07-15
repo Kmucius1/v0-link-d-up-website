@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
     const { data: event, error } = await supabaseAdmin
       .from('events')
       .insert({
+        id: crypto.randomUUID(),
         eventName: body.eventName,
         eventSlug: body.eventSlug,
         eventDate: new Date(body.eventDate).toISOString(),

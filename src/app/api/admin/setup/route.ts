@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   const hashed = await bcrypt.hash(password, 12)
   const { data, error } = await supabaseAdmin
     .from('admin_users')
-    .insert({ email, password: hashed, name: name || null })
+    .insert({ id: crypto.randomUUID(), email, password: hashed, name: name || null })
     .select()
     .single()
 

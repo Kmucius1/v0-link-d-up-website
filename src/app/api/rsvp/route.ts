@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
       const { data, error } = await supabaseAdmin
         .from('contacts')
         .insert({
+          id: crypto.randomUUID(),
           firstName,
           lastName,
           fullName,
@@ -129,6 +130,7 @@ export async function POST(req: NextRequest) {
       const { data, error } = await supabaseAdmin
         .from('rsvps')
         .insert({
+          id: crypto.randomUUID(),
           contactId: contact.id,
           eventId,
           rsvpStatus: 'confirmed',
@@ -155,6 +157,7 @@ export async function POST(req: NextRequest) {
         })
 
         await supabaseAdmin.from('email_logs').insert({
+          id: crypto.randomUUID(),
           contactId: contact.id,
           eventId,
           emailType: 'confirmation',
@@ -163,6 +166,7 @@ export async function POST(req: NextRequest) {
         })
       } catch {
         await supabaseAdmin.from('email_logs').insert({
+          id: crypto.randomUUID(),
           contactId: contact.id,
           eventId,
           emailType: 'confirmation',

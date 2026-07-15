@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       supabaseAdmin
         .from('survey_responses')
         .insert({
+          id: crypto.randomUUID(),
           contactId,
           eventId: eventId || null,
           surveyTitle,

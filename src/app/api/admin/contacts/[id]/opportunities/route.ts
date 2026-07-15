@@ -9,7 +9,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data: record, error } = await supabaseAdmin
     .from('opportunities')
-    .insert({ contactId: id, opportunityType, notes: notes || null, eventId: eventId || null })
+    .insert({ id: crypto.randomUUID(), contactId: id, opportunityType, notes: notes || null, eventId: eventId || null })
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

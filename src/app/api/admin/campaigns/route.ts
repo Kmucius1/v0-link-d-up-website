@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   const { name, subject, bodyHtml, audienceTag, eventId } = await req.json()
   const { data: campaign, error } = await supabaseAdmin
     .from('email_campaigns')
-    .insert({ name, subject, bodyHtml, audienceTag: audienceTag || null, eventId: eventId || null })
+    .insert({ id: crypto.randomUUID(), name, subject, bodyHtml, audienceTag: audienceTag || null, eventId: eventId || null })
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
