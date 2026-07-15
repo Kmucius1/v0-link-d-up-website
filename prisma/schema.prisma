@@ -304,3 +304,33 @@ model LocalOutreach {
 
   @@map("local_outreach")
 }
+
+model SocialConnection {
+  id              String    @id @default(cuid())
+  platform        String
+  pageId          String?
+  pageName        String?
+  pageAccessToken String?
+  igBusinessId    String?
+  igUsername      String?
+  connectedAt     DateTime  @default(now())
+  expiresAt       DateTime?
+  connectedBy     String?
+
+  @@map("social_connections")
+}
+
+model SocialPost {
+  id             String    @id @default(cuid())
+  platform       String
+  message        String?
+  imageUrl       String?
+  status         String    @default("pending")
+  externalPostId String?
+  permalink      String?
+  errorMessage   String?
+  createdAt      DateTime  @default(now())
+  postedAt       DateTime?
+
+  @@map("social_posts")
+}

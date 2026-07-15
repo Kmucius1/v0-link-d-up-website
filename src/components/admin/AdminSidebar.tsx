@@ -20,6 +20,7 @@ import {
   MapPin,
   Inbox,
   Send,
+  Share2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -36,6 +37,7 @@ const nav = [
   { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
   { href: '/admin/contact-forms', label: 'Contact Forms', icon: Inbox },
   { href: '/admin/campaigns', label: 'Email Campaigns', icon: Mail },
+  { href: '/admin/social', label: 'Social Media', icon: Share2 },
   { href: '/admin/followups', label: 'Follow-Up Tasks', icon: CheckSquare },
   { href: '/admin/promo-tasks', label: 'Promo Tasks', icon: Megaphone },
   { href: '/admin/outreach', label: 'Local Outreach', icon: MapPin },
