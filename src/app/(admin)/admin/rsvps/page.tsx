@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { ClipboardList, CheckCircle, XCircle } from 'lucide-react'
+import SendReminderButton from '@/components/admin/SendReminderButton'
 
 export default async function RSVPsPage({
   searchParams,
@@ -60,10 +61,18 @@ export default async function RSVPsPage({
           <h1 className="text-2xl font-bold text-white">RSVPs</h1>
           <p className="text-zinc-400 text-sm mt-0.5">{total.toLocaleString()} total RSVPs</p>
         </div>
-        <a href="/api/admin/rsvps/export"
-          className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium rounded-lg transition-colors">
-          Export CSV
-        </a>
+        <div className="flex items-center gap-3">
+          {params.event && (
+            <SendReminderButton
+              eventId={params.event}
+              eventName={(events ?? []).find((e) => e.id === params.event)?.eventName || 'this event'}
+            />
+          )}
+          <a href="/api/admin/rsvps/export"
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium rounded-lg transition-colors">
+            Export CSV
+          </a>
+        </div>
       </div>
 
       {/* Filters */}

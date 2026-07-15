@@ -294,8 +294,7 @@ export default function RsvpPage() {
                   className="sr-only"
                 />
                 <div
-                  onClick={() => set('consentToEmail', !form.consentToEmail)}
-                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors cursor-pointer ${
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                     form.consentToEmail ? 'bg-[#7F90A8] border-[#7F90A8]' : 'border-[#333] bg-transparent'
                   }`}
                 >

@@ -1,7 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { Mail, Plus, Send } from 'lucide-react'
+import { Mail, Plus } from 'lucide-react'
+import SendCampaignButton from '@/components/admin/SendCampaignButton'
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-zinc-700 text-zinc-300',
@@ -92,9 +93,7 @@ export default async function CampaignsPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {campaign.status === 'draft' && (
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium rounded-lg transition-colors">
-                      <Send size={11} /> Send
-                    </button>
+                    <SendCampaignButton campaignId={campaign.id} campaignName={campaign.name} />
                   )}
                   {campaign.sentAt && (
                     <p className="text-xs text-zinc-500">Sent {format(campaign.sentAt, 'MMM d, yyyy')}</p>
