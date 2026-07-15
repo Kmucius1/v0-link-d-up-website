@@ -22,8 +22,8 @@ function wrapCampaignHtml(bodyHtml: string, contactId: string): string {
 <html>
 <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="max-width:560px;margin:40px auto;background:#111;border-radius:16px;overflow:hidden;border:1px solid #222;">
-    <div style="background:linear-gradient(135deg,#7c3aed,#a21caf);padding:32px;text-align:center;">
-      <h1 style="color:#fff;font-size:24px;font-weight:800;margin:0;letter-spacing:-0.5px;">LINK'D UP</h1>
+    <div style="background:#000;">
+      <img src="https://www.linkdup.club/images/hero-banner.png" alt="LINK'D UP" width="560" style="width:100%;max-width:560px;height:auto;display:block;" />
     </div>
     <div style="padding:32px;color:#e2e8f0;font-size:15px;line-height:1.6;">
       ${bodyHtml}

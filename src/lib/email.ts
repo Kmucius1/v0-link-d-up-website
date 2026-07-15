@@ -37,9 +37,8 @@ export async function sendRsvpConfirmation({
 <html>
 <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="max-width:560px;margin:40px auto;background:#111;border-radius:16px;overflow:hidden;border:1px solid #222;">
-    <div style="background:linear-gradient(135deg,#7c3aed,#a21caf);padding:40px 32px;text-align:center;">
-      <h1 style="color:#fff;font-size:28px;font-weight:800;margin:0;letter-spacing:-0.5px;">LINK'D UP</h1>
-      <p style="color:rgba(255,255,255,0.8);margin:8px 0 0;font-size:14px;">Where community connects</p>
+    <div style="background:#000;">
+      <img src="https://www.linkdup.club/images/hero-banner.png" alt="LINK'D UP" width="560" style="width:100%;max-width:560px;height:auto;display:block;" />
     </div>
     <div style="padding:36px 32px;">
       <p style="color:#e2e8f0;font-size:16px;margin:0 0 24px;">Hey ${name} 👋</p>
@@ -103,8 +102,8 @@ export async function sendSurveyRequest({
 <html>
 <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="max-width:560px;margin:40px auto;background:#111;border-radius:16px;overflow:hidden;border:1px solid #222;">
-    <div style="background:linear-gradient(135deg,#7c3aed,#a21caf);padding:40px 32px;text-align:center;">
-      <h1 style="color:#fff;font-size:28px;font-weight:800;margin:0;">LINK'D UP</h1>
+    <div style="background:#000;">
+      <img src="https://www.linkdup.club/images/hero-banner.png" alt="LINK'D UP" width="560" style="width:100%;max-width:560px;height:auto;display:block;" />
     </div>
     <div style="padding:36px 32px;">
       <p style="color:#e2e8f0;font-size:16px;margin:0 0 20px;">Hey ${name}!</p>
