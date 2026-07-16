@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 const eventTypes = [
@@ -39,8 +39,11 @@ const industries = [
 function SurveyContent() {
   const params = useSearchParams()
   const contactId = params.get('id') || ''
-  const eventId = params.get('event') || ''
+  const [eventId, setEventId] = useState(params.get('event') || '')
 
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
   const [rating, setRating] = useState(0)
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [selectedOpportunities, setSelectedOpportunities] = useState<string[]>([])
@@ -51,13 +54,22 @@ function SurveyContent() {
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    if (eventId) return
+    fetch('/api/events/active')
+      .then(r => r.json())
+      .then(d => { if (d.id) setEventId(d.id) })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   function toggle(arr: string[], setArr: (v: string[]) => void, val: string) {
     setArr(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val])
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!contactId) { setError('Missing your contact ID. Please use the link from your email.'); return }
+    if (!contactId && !email.trim()) { setError('Please enter your email so we know who this is from.'); return }
     setLoading(true)
     setError('')
 
@@ -65,7 +77,10 @@ function SurveyContent() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contactId,
+        contactId: contactId || undefined,
+        firstName: contactId ? undefined : firstName.trim(),
+        lastName: contactId ? undefined : lastName.trim(),
+        email: contactId ? undefined : email.trim(),
         eventId: eventId || undefined,
         surveyTitle: "LINK'D UP Post-Event Feedback",
         answers: { eventTypes: selectedEvents, opportunities: selectedOpportunities, industries: selectedIndustries },
@@ -119,6 +134,36 @@ function SurveyContent() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-10">
+
+          {!contactId && (
+            <div>
+              <label className="block text-xs font-bold tracking-[0.15em] text-[#7F90A8] mb-4">
+                YOUR INFO
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  placeholder="First name"
+                  className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
+                />
+                <input
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  placeholder="Last name"
+                  className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors"
+                />
+              </div>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-[#171717] border border-[#7F90A8]/20 rounded-xl px-4 py-3 text-[#F7F7F7] placeholder-[#7F90A8]/40 focus:outline-none focus:border-[#7F90A8] transition-colors mt-3"
+              />
+            </div>
+          )}
 
           {/* Rating */}
           <div>

@@ -9,7 +9,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
 
     const {
-      contactId,
+      contactId: providedContactId,
+      firstName,
+      lastName,
+      email,
       eventId,
       surveyTitle,
       answers,
@@ -19,8 +22,53 @@ export async function POST(req: NextRequest) {
       suggestedFollowUp,
     } = body
 
-    if (!contactId || !surveyTitle || !answers) {
+    if (!providedContactId && !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+    if (!surveyTitle || !answers) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    let contactId = providedContactId as string | undefined
+
+    if (!contactId) {
+      const normalizedEmail = (email as string).toLowerCase().trim()
+      const { data: existingContact } = await supabaseAdmin
+        .from('contacts')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .maybeSingle()
+
+      if (existingContact) {
+        contactId = existingContact.id
+        await supabaseAdmin
+          .from('contacts')
+          .update({
+            firstName: firstName || undefined,
+            lastName: lastName || undefined,
+            fullName: firstName ? `${firstName} ${lastName || ''}`.trim() : undefined,
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', contactId)
+      } else {
+        const { data: newContact, error: createError } = await supabaseAdmin
+          .from('contacts')
+          .insert({
+            id: crypto.randomUUID(),
+            firstName: firstName || '',
+            lastName: lastName || '',
+            fullName: `${firstName || ''} ${lastName || ''}`.trim() || normalizedEmail,
+            email: normalizedEmail,
+            consentToEmail: true,
+            contactSource: 'survey',
+          })
+          .select('id')
+          .single()
+        if (createError || !newContact) {
+          return NextResponse.json({ error: createError?.message || 'Failed to create contact' }, { status: 500 })
+        }
+        contactId = newContact.id
+      }
     }
 
     const [surveyResult, contactResult] = await Promise.all([
