@@ -55,9 +55,14 @@ export default function Home() {
             <a href="#why" className="hover:text-[#F7F7F7] transition-colors">Why Attend</a>
             <a href="#partners" className="hover:text-[#F7F7F7] transition-colors">Partners</a>
           </div>
-          <Link href="/rsvp" className="bg-[#7F90A8] hover:bg-[#AEB9C8] text-[#050505] font-semibold text-sm px-5 py-2.5 rounded-full transition-colors">
-            RSVP Now
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/home" className="hidden sm:inline text-sm text-[#AEB9C8] hover:text-[#F7F7F7] transition-colors">
+              Member Login
+            </Link>
+            <Link href="/rsvp" className="bg-[#7F90A8] hover:bg-[#AEB9C8] text-[#050505] font-semibold text-sm px-5 py-2.5 rounded-full transition-colors">
+              RSVP Now
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -257,7 +262,10 @@ export default function Home() {
         </div>
         <div className="max-w-5xl mx-auto px-6 pt-6 border-t border-[#7F90A8]/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#AEB9C8]">
           <span>© 2026 Link&apos;d Up. All rights reserved.</span>
-          <Link href="/admin/login" className="text-[#7F90A8]/50 hover:text-[#7F90A8] transition-colors">Admin Portal</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/home" className="text-[#7F90A8]/70 hover:text-[#7F90A8] transition-colors">Member App</Link>
+            <Link href="/admin/login" className="text-[#7F90A8]/50 hover:text-[#7F90A8] transition-colors">Admin Portal</Link>
+          </div>
         </div>
       </footer>
 
