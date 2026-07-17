@@ -172,6 +172,108 @@ model AdminUser {
   @@map("admin_users")
 }
 
+// ─── Member app (client-facing) ─────────────────────────────────────────────
+
+model Member {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  password       String
+  firstName      String
+  lastName       String?
+  fullName       String
+  businessName   String?
+  roleOrIndustry String?
+  city           String?
+  instagram      String?
+  website        String?
+  bio            String?
+  avatarUrl      String?
+  contactId      String?  // links to the CRM Contact record
+  status         String   @default("active") // active | pending | suspended — lets us switch to approval later
+  role           String   @default("member")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastSeenAt     DateTime?
+
+  posts             Post[]
+  comments          PostComment[]
+  likes             PostLike[]
+  pushSubscriptions PushSubscription[]
+
+  @@map("members")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  memberId  String
+  body      String
+  imageUrl  String?
+  kind      String   @default("update") // update | ask | offer
+  city      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  member   Member        @relation(fields: [memberId], references: [id])
+  comments PostComment[]
+  likes    PostLike[]
+
+  @@map("posts")
+}
+
+model PostComment {
+  id        String   @id @default(cuid())
+  postId    String
+  memberId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  post   Post   @relation(fields: [postId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@map("post_comments")
+}
+
+model PostLike {
+  id       String @id @default(cuid())
+  postId   String
+  memberId String
+
+  post   Post   @relation(fields: [postId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([postId, memberId])
+  @@map("post_likes")
+}
+
+model Update {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  category    String   @default("ai") // ai | growth | event | announcement
+  link        String?
+  imageUrl    String?
+  pinned      Boolean  @default(false)
+  published   Boolean  @default(true)
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("updates")
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  memberId  String?
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  member Member? @relation(fields: [memberId], references: [id])
+
+  @@map("push_subscriptions")
+}
+
 model EmailCampaign {
   id          String    @id @default(cuid())
   name        String

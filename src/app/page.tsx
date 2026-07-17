@@ -55,9 +55,15 @@ export default function Home() {
             <a href="#why" className="hover:text-[#F7F7F7] transition-colors">Why Attend</a>
             <a href="#partners" className="hover:text-[#F7F7F7] transition-colors">Partners</a>
           </div>
-          <Link href="/rsvp" className="bg-[#7F90A8] hover:bg-[#AEB9C8] text-[#050505] font-semibold text-sm px-5 py-2.5 rounded-full transition-colors">
-            RSVP Now
-          </Link>
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <Link href="/home" className="whitespace-nowrap rounded-full border border-[#7F90A8]/40 px-3.5 py-2 text-sm font-medium text-[#F7F7F7] transition-colors hover:bg-[#7F90A8]/10 sm:border-0 sm:px-0 sm:py-0 sm:text-[#AEB9C8] sm:hover:text-[#F7F7F7]">
+              <span className="sm:hidden">Log In</span>
+              <span className="hidden sm:inline">Member Login</span>
+            </Link>
+            <Link href="/rsvp" className="whitespace-nowrap rounded-full bg-[#7F90A8] px-4 py-2 text-sm font-semibold text-[#050505] transition-colors hover:bg-[#AEB9C8] sm:px-5 sm:py-2.5">
+              RSVP
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -83,6 +89,12 @@ export default function Home() {
                 View Facebook Event
               </a>
             </div>
+            <p className="mt-6 text-sm text-[#AEB9C8]">
+              Already a member?{' '}
+              <Link href="/home" className="font-semibold text-[#F7F7F7] underline underline-offset-4 hover:text-[#7F90A8]">
+                Open the app →
+              </Link>
+            </p>
             <div className="flex flex-wrap justify-center gap-4 mt-10 text-sm text-[#AEB9C8]">
               {['Meet your next collaborator', 'Meet your next client', 'Meet your next creative partner', 'Meet your next referral source'].map(t => (
                 <span key={t} className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#7F90A8] inline-block" />{t}</span>
@@ -257,7 +269,10 @@ export default function Home() {
         </div>
         <div className="max-w-5xl mx-auto px-6 pt-6 border-t border-[#7F90A8]/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#AEB9C8]">
           <span>© 2026 Link&apos;d Up. All rights reserved.</span>
-          <Link href="/admin/login" className="text-[#7F90A8]/50 hover:text-[#7F90A8] transition-colors">Admin Portal</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/home" className="text-[#7F90A8]/70 hover:text-[#7F90A8] transition-colors">Member App</Link>
+            <Link href="/admin/login" className="text-[#7F90A8]/50 hover:text-[#7F90A8] transition-colors">Admin Portal</Link>
+          </div>
         </div>
       </footer>
 

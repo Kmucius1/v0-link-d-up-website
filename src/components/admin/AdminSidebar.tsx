@@ -21,6 +21,7 @@ import {
   Inbox,
   Send,
   Share2,
+  Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -38,6 +39,7 @@ const nav = [
   { href: '/admin/contact-forms', label: 'Contact Forms', icon: Inbox },
   { href: '/admin/campaigns', label: 'Email Campaigns', icon: Mail },
   { href: '/admin/social', label: 'Social Media', icon: Share2 },
+  { href: '/admin/updates', label: 'Member Updates', icon: Sparkles },
   { href: '/admin/followups', label: 'Follow-Up Tasks', icon: CheckSquare },
   { href: '/admin/promo-tasks', label: 'Promo Tasks', icon: Megaphone },
   { href: '/admin/outreach', label: 'Local Outreach', icon: MapPin },
