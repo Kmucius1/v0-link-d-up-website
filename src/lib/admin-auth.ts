@@ -24,5 +24,12 @@ export async function verifyAdminCredentials(email: string, password: string) {
     .single()
   if (!data) return null
   const valid = await bcrypt.compare(password, data.password)
-  return valid ? data : null
+  if (!valid) return null
+
+  await supabaseAdmin
+    .from('admin_users')
+    .update({ lastLoginAt: new Date().toISOString() })
+    .eq('id', data.id)
+
+  return data
 }

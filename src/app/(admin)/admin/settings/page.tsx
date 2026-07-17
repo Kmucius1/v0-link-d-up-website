@@ -1,11 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { format, formatDistanceToNow } from 'date-fns'
+
+type AdminUser = {
+  id: string
+  email: string
+  name: string | null
+  createdAt: string
+  lastLoginAt: string | null
+}
 
 export default function SettingsPage() {
   const [invite, setInvite] = useState({ email: '', name: '', password: '' })
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [inviteError, setInviteError] = useState('')
+  const [users, setUsers] = useState<AdminUser[]>([])
+  const [usersLoading, setUsersLoading] = useState(true)
+
+  function loadUsers() {
+    setUsersLoading(true)
+    fetch('/api/admin/users')
+      .then(r => r.json())
+      .then(d => setUsers(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setUsersLoading(false))
+  }
+
+  useEffect(() => {
+    loadUsers()
+  }, [])
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
@@ -24,6 +48,7 @@ export default function SettingsPage() {
       } else {
         setInviteStatus('success')
         setInvite({ email: '', name: '', password: '' })
+        loadUsers()
       }
     } catch {
       setInviteError('Something went wrong.')
@@ -36,6 +61,35 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold text-white">Settings</h1>
         <p className="text-zinc-400 text-sm mt-0.5">Manage your LINK&apos;D UP CRM</p>
+      </div>
+
+      {/* Admin Users */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+        <div>
+          <h2 className="font-semibold text-white">Admin Users</h2>
+          <p className="text-zinc-400 text-xs mt-0.5">Everyone with access to this dashboard, and when they last signed in.</p>
+        </div>
+
+        {usersLoading ? (
+          <p className="text-zinc-500 text-sm">Loading...</p>
+        ) : (
+          <div className="divide-y divide-zinc-800">
+            {users.map(u => (
+              <div key={u.id} className="flex items-center justify-between py-3">
+                <div>
+                  <p className="text-sm text-zinc-200 font-medium">{u.name || u.email}</p>
+                  <p className="text-xs text-zinc-500">{u.email}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-zinc-400">
+                    {u.lastLoginAt ? `Last signed in ${formatDistanceToNow(new Date(u.lastLoginAt), { addSuffix: true })}` : 'Never signed in'}
+                  </p>
+                  <p className="text-[11px] text-zinc-600">Account created {format(new Date(u.createdAt), 'MMM d, yyyy')}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Invite Admin */}
