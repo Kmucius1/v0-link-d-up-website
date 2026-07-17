@@ -24,14 +24,17 @@ export type Member = {
   createdAt: string
 }
 
-/** Returns the signed-in member, or null. Never redirects. */
+const MEMBER_PUBLIC_FIELDS =
+  'id, email, firstName, lastName, fullName, businessName, roleOrIndustry, city, instagram, website, bio, avatarUrl, contactId, status, role, createdAt'
+
+/** Returns the signed-in member (never includes the password hash), or null. Never redirects. */
 export async function getMember(): Promise<Member | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(MEMBER_COOKIE)?.value
   if (!token) return null
   const { data } = await supabaseAdmin
     .from('members')
-    .select('*')
+    .select(MEMBER_PUBLIC_FIELDS)
     .eq('id', token)
     .maybeSingle()
   if (!data) return null
