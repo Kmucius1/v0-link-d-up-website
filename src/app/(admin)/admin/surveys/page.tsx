@@ -20,7 +20,7 @@ export default async function SurveysPage({
   let query = supabaseAdmin
     .from('survey_responses')
     .select('*, contacts(id, fullName, email), events(id, eventName)', { count: 'exact' })
-    .order('createdAt', { ascending: false })
+    .order('submittedAt', { ascending: false })
     .range((pageNum - 1) * perPage, pageNum * perPage - 1)
 
   if (params.event) query = query.eq('eventId', params.event)
@@ -80,7 +80,7 @@ export default async function SurveysPage({
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-500 mt-0.5">{survey.contact.email} · Submitted {format(survey.submittedAt ?? survey.createdAt, 'MMM d, yyyy')}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{survey.contact.email} · Submitted {format(survey.submittedAt, 'MMM d, yyyy')}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       {survey.rating && Array.from({ length: 5 }).map((_, i) => (

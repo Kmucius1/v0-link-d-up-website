@@ -4,7 +4,7 @@ import { Mail } from 'lucide-react'
 
 export default async function NewsletterPage() {
   const { data: signups } = await supabaseAdmin
-    .from('newsletter_subscribers')
+    .from('newsletter_signups')
     .select('*')
     .order('createdAt', { ascending: false })
 
