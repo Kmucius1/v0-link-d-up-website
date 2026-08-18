@@ -9,9 +9,9 @@ export default async function UpdatesPage() {
   await requireMember()
   return (
     <div>
-      <AppHeader title="AI & Updates" subtitle="New AI · growth plays · Link'd Up news" color="#5E5CE6" />
+      <AppHeader title="Activity & Updates" subtitle="LINK'D UP news · AI · growth" color="#5DA8FF" />
       <div className="px-3">
-        <div className="mb-3">
+        <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.025] p-1">
           <NotificationToggle variant="inline" />
         </div>
         <UpdatesFeed />
