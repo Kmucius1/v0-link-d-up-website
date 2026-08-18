@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Search, Menu } from 'lucide-react'
 
 export function AppHeader({
   title,
   subtitle,
-  color = '#0A84FF',
+  color = '#2d8cff',
   back = '/home',
   right,
 }: {
@@ -17,19 +17,22 @@ export function AppHeader({
   right?: React.ReactNode
 }) {
   return (
-    <header className="flex items-center gap-3 px-4 pb-3 pt-4">
-      <Link
-        href={back}
-        aria-label="Back"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.08] active:scale-95"
-      >
-        <ChevronLeft size={26} className="text-white" style={{ color }} />
-      </Link>
-      <div className="min-w-0 flex-1">
-        <h1 className="truncate text-[26px] font-bold leading-tight tracking-tight text-white">{title}</h1>
-        {subtitle && <p className="truncate text-sm text-white/45">{subtitle}</p>}
+    <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-[#0b0f16]/88 px-4 pb-3 pt-3 backdrop-blur-2xl">
+      <div className="flex items-center gap-3">
+        <Link href={back} aria-label="Back" className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.035] active:scale-95">
+          <ChevronLeft size={25} style={{ color }} />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-[25px] font-bold leading-none tracking-[-0.03em] text-white">{title}</h1>
+          {subtitle && <p className="mt-1 truncate text-[13px] text-[#9ba4b4]">{subtitle}</p>}
+        </div>
+        {right ?? (
+          <div className="flex items-center gap-1">
+            <button aria-label="Search" className="flex h-10 w-10 items-center justify-center rounded-full text-white/90 active:bg-white/10"><Search size={23} /></button>
+            <button aria-label="Menu" className="flex h-10 w-10 items-center justify-center rounded-full text-white/90 active:bg-white/10"><Menu size={23} /></button>
+          </div>
+        )}
       </div>
-      {right}
     </header>
   )
 }
