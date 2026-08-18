@@ -2,42 +2,46 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, Sparkles, UserRound } from 'lucide-react'
+import { Home, Search, Plus, Bell, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const tabs = [
-  { href: '/home', label: 'Home', icon: Home, color: '#0A84FF' },
-  { href: '/circle', label: 'Circle', icon: Users, color: '#34C759' },
-  { href: '/updates', label: 'Updates', icon: Sparkles, color: '#5E5CE6' },
-  { href: '/profile', label: 'Me', icon: UserRound, color: '#8E8E93' },
+  { href: '/home', label: 'Home', icon: Home },
+  { href: '/circle', label: 'Discover', icon: Search },
+  { href: '/updates', label: 'Activity', icon: Bell },
+  { href: '/profile', label: 'Profile', icon: UserRound },
 ]
 
 export function BottomNav() {
   const pathname = usePathname()
+
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 pointer-events-none pb-[max(env(safe-area-inset-bottom),12px)] pt-2">
-      <div className="pointer-events-auto mx-auto flex max-w-md items-center justify-between gap-1 rounded-[26px] border border-white/10 bg-[#161618]/85 px-2.5 py-2.5 shadow-2xl backdrop-blur-2xl mx-3">
-        {tabs.map(({ href, label, icon: Icon, color }) => {
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0c1017]/95 pb-[max(env(safe-area-inset-bottom),8px)] backdrop-blur-2xl">
+      <div className="mx-auto flex h-[72px] max-w-md items-center justify-around px-3">
+        {tabs.slice(0, 2).map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/')
           return (
-            <Link
-              key={href}
-              href={href}
-              aria-label={label}
-              className="flex flex-1 flex-col items-center gap-1 py-1"
-            >
-              <span
-                className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-[16px] transition-all duration-200',
-                  active ? 'scale-105 shadow-lg' : 'bg-white/[0.06]'
-                )}
-                style={active ? { backgroundColor: color } : undefined}
-              >
-                <Icon size={25} strokeWidth={2.2} className={active ? 'text-white' : 'text-white/60'} />
-              </span>
-              <span className={cn('text-[11px] font-semibold', active ? 'text-white' : 'text-white/45')}>
-                {label}
-              </span>
+            <Link key={href} href={href} className="flex min-w-16 flex-col items-center gap-1 text-[10px] font-medium">
+              <Icon size={27} strokeWidth={active ? 2.5 : 2} className={cn(active ? 'text-[#2d8cff]' : 'text-white/72')} />
+              <span className={cn(active ? 'text-[#2d8cff]' : 'text-white/45')}>{label}</span>
+            </Link>
+          )
+        })}
+
+        <Link
+          href="/circle"
+          aria-label="Create post"
+          className="-mt-2 flex h-13 w-13 items-center justify-center rounded-2xl border border-[#78b9ff]/55 bg-gradient-to-b from-[#268cff] to-[#0c63dd] shadow-[0_8px_28px_rgba(27,128,255,.35)] active:scale-95"
+        >
+          <Plus size={30} strokeWidth={2.2} />
+        </Link>
+
+        {tabs.slice(2).map(({ href, label, icon: Icon }) => {
+          const active = pathname === href || pathname.startsWith(href + '/')
+          return (
+            <Link key={href} href={href} className="flex min-w-16 flex-col items-center gap-1 text-[10px] font-medium">
+              <Icon size={27} strokeWidth={active ? 2.5 : 2} className={cn(active ? 'text-[#2d8cff]' : 'text-white/72')} />
+              <span className={cn(active ? 'text-[#2d8cff]' : 'text-white/45')}>{label}</span>
             </Link>
           )
         })}
