@@ -1,5 +1,5 @@
 /* LINK'D UP service worker — push notifications + installability */
-const VERSION = 'linkdup-v4'
+const VERSION = 'linkdup-v5'
 
 self.addEventListener('install', () => {
   self.skipWaiting()
