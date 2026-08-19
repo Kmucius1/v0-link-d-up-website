@@ -1,12 +1,16 @@
 /* LINK'D UP service worker — push notifications + installability */
-const VERSION = 'linkdup-v1'
+const VERSION = 'linkdup-v2'
 
 self.addEventListener('install', () => {
   self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== VERSION).map((key) => caches.delete(key)))
+    ).then(() => self.clients.claim())
+  )
 })
 
 // A minimal fetch handler is required for the app to be installable.
