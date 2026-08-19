@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { supabaseAdmin } from './supabase-admin'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 export const MEMBER_COOKIE = 'member_session'
 
@@ -58,4 +59,55 @@ export async function verifyMemberCredentials(email: string, password: string) {
   if (!data) return null
   const valid = await bcrypt.compare(password, data.password)
   return valid ? (data as Member & { password: string }) : null
+}
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000 // 1 hour
+
+function hashResetToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
+
+/**
+ * Issues a password reset token for the given email, if a member exists.
+ * Returns the raw token (to put in the email link) or null if no such member —
+ * callers should respond identically either way to avoid leaking which emails are registered.
+ */
+export async function createPasswordResetToken(email: string): Promise<{ token: string; firstName: string } | null> {
+  const { data } = await supabaseAdmin
+    .from('members')
+    .select('id, firstName')
+    .eq('email', email.toLowerCase().trim())
+    .maybeSingle()
+  if (!data) return null
+
+  const token = crypto.randomBytes(32).toString('hex')
+  const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS).toISOString()
+  await supabaseAdmin
+    .from('members')
+    .update({ resetToken: hashResetToken(token), resetTokenExpiresAt: expiresAt })
+    .eq('id', data.id)
+
+  return { token, firstName: data.firstName }
+}
+
+/** Validates a reset token and, if valid, sets the new password. Consumes the token either way. */
+export async function resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+  const hashed = hashResetToken(token)
+  const { data } = await supabaseAdmin
+    .from('members')
+    .select('id, resetTokenExpiresAt')
+    .eq('resetToken', hashed)
+    .maybeSingle()
+
+  if (!data || !data.resetTokenExpiresAt || new Date(data.resetTokenExpiresAt) < new Date()) {
+    return false
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12)
+  await supabaseAdmin
+    .from('members')
+    .update({ password: passwordHash, resetToken: null, resetTokenExpiresAt: null, updatedAt: new Date().toISOString() })
+    .eq('id', data.id)
+
+  return true
 }

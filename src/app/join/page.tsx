@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 
 export default function JoinPage() {
@@ -117,6 +118,11 @@ export default function JoinPage() {
               {loading && <Loader2 size={16} className="animate-spin" />}
               Sign In
             </button>
+            <p className="text-center text-xs text-zinc-600">
+              <Link href="/forgot-password" className="hover:text-zinc-400">
+                Forgot password?
+              </Link>
+            </p>
           </form>
         ) : (
           <form onSubmit={submitSignUp} className="space-y-3">

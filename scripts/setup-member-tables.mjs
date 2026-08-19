@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS "members" (
   "updatedAt" timestamptz NOT NULL DEFAULT now(),
   "lastSeenAt" timestamptz
 );
+ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "resetToken" text;
+ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "resetTokenExpiresAt" timestamptz;
 
 CREATE TABLE IF NOT EXISTS "posts" (
   "id" text PRIMARY KEY,

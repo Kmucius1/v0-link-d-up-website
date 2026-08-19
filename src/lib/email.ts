@@ -82,6 +82,51 @@ export async function sendRsvpConfirmation({
   })
 }
 
+export async function sendPasswordReset({
+  to,
+  name,
+  resetUrl,
+}: {
+  to: string
+  name: string
+  resetUrl: string
+}) {
+  return getResend().emails.send({
+    from: getFrom(),
+    to,
+    subject: `Reset your password — LINK'D UP`,
+    html: `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:40px auto;background:#111;border-radius:16px;overflow:hidden;border:1px solid #222;">
+    <div style="background:#000;">
+      <img src="https://www.linkdup.club/images/hero-banner.png" alt="LINK'D UP" width="560" style="width:100%;max-width:560px;height:auto;display:block;" />
+    </div>
+    <div style="padding:36px 32px;">
+      <p style="color:#e2e8f0;font-size:16px;margin:0 0 24px;">Hey ${name},</p>
+      <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 28px;">
+        We got a request to reset your LINK'D UP password. Click below to choose a new one. This link expires in 1 hour.
+      </p>
+      <div style="text-align:center;margin:32px 0;">
+        <a href="${resetUrl}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a21caf);color:#fff;font-weight:700;font-size:15px;padding:16px 36px;border-radius:12px;text-decoration:none;letter-spacing:0.3px;">
+          Reset Password →
+        </a>
+      </div>
+      <p style="color:#334155;font-size:13px;line-height:1.6;margin:0;">
+        Didn't request this? You can safely ignore this email — your password won't change.
+      </p>
+    </div>
+    <div style="padding:20px 32px;border-top:1px solid #1e1e1e;text-align:center;">
+      <p style="color:#334155;font-size:12px;margin:0;">LINK'D UP by DRYP Digital · <a href="https://www.linkdup.club" style="color:#7c3aed;text-decoration:none;">linkdup.club</a></p>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim(),
+  })
+}
+
 export async function sendSurveyRequest({
   to,
   name,
