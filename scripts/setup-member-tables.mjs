@@ -120,6 +120,25 @@ CREATE TABLE IF NOT EXISTS "updates" (
 );
 CREATE INDEX IF NOT EXISTS "updates_createdAt_idx" ON "updates" ("createdAt" DESC);
 
+CREATE TABLE IF NOT EXISTS "dm_messages" (
+  "id" text PRIMARY KEY,
+  "senderId" text NOT NULL,
+  "recipientId" text NOT NULL,
+  "body" text NOT NULL,
+  "createdAt" timestamptz NOT NULL DEFAULT now(),
+  "readAt" timestamptz
+);
+CREATE INDEX IF NOT EXISTS "dm_messages_thread_idx" ON "dm_messages" ("senderId", "recipientId", "createdAt");
+CREATE INDEX IF NOT EXISTS "dm_messages_recipient_idx" ON "dm_messages" ("recipientId", "readAt");
+
+CREATE TABLE IF NOT EXISTS "post_saves" (
+  "id" text PRIMARY KEY,
+  "postId" text NOT NULL,
+  "memberId" text NOT NULL,
+  "createdAt" timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "post_saves_postId_memberId_key" ON "post_saves" ("postId", "memberId");
+
 CREATE TABLE IF NOT EXISTS "push_subscriptions" (
   "id" text PRIMARY KEY,
   "memberId" text,

@@ -1,5 +1,6 @@
 import { requireMember } from '@/lib/member-auth'
 import { BottomNav } from '@/components/app/BottomNav'
+import { DesktopSidebar } from '@/components/app/DesktopSidebar'
 import { ServiceWorkerRegister } from '@/components/app/ServiceWorkerRegister'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       }}
     >
       <ServiceWorkerRegister />
-      <main className="mx-auto min-h-dvh w-full max-w-md pb-24 pt-[max(env(safe-area-inset-top),8px)]">
+      <DesktopSidebar />
+      <main className="mx-auto min-h-dvh w-full max-w-md pb-24 pt-[max(env(safe-area-inset-top),8px)] lg:mx-0 lg:max-w-none lg:pb-10 lg:pl-[244px]">
         {children}
       </main>
       <BottomNav />

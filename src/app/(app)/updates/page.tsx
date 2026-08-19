@@ -10,7 +10,7 @@ export default async function UpdatesPage() {
   return (
     <div>
       <AppHeader title="AI & Updates" subtitle="New AI · growth plays · Link'd Up news" color="#5E5CE6" />
-      <div className="px-3">
+      <div className="px-3 lg:mx-auto lg:max-w-md">
         <div className="mb-3">
           <NotificationToggle variant="inline" />
         </div>

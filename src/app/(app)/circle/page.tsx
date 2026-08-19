@@ -9,7 +9,7 @@ export default async function CirclePage() {
   return (
     <div>
       <AppHeader title="Growth Circle" subtitle="Post · connect · collaborate" color="#5DA8FF" />
-      <div className="px-3">
+      <div className="px-3 lg:mx-auto lg:max-w-[630px] lg:px-0 lg:pt-6">
         <CircleFeed me={{ fullName: member.fullName, businessName: member.businessName, avatarUrl: member.avatarUrl }} />
       </div>
     </div>

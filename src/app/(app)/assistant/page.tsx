@@ -9,7 +9,9 @@ export default async function AssistantPage() {
   return (
     <div>
       <AppHeader title="Assistant" subtitle="LINQ · your Link'd Up AI" color="#5E5CE6" />
-      <Assistant firstName={member.firstName} />
+      <div className="lg:mx-auto lg:max-w-md">
+        <Assistant firstName={member.firstName} />
+      </div>
     </div>
   )
 }

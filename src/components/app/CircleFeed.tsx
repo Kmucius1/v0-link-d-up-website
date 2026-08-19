@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { Bookmark, Heart, ImagePlus, Loader2, MessageCircle, MoreHorizontal, Send, Sparkles, Users, X } from 'lucide-react'
 import { initials, timeAgo } from '@/lib/format'
 
-type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null } | null
-type Post = { id: string; memberId: string; body: string; imageUrl: string | null; kind: string; createdAt: string; author: Author; likeCount: number; commentCount: number; likedByMe: boolean; mine: boolean }
+export type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null } | null
+export type Post = { id: string; memberId: string; body: string; imageUrl: string | null; kind: string; createdAt: string; author: Author; likeCount: number; commentCount: number; likedByMe: boolean; mine: boolean; savedByMe?: boolean }
 type Comment = { id: string; body: string; createdAt: string; author: Author }
 
 const KINDS: Record<string, { label: string; cls: string }> = {
@@ -37,7 +38,7 @@ export function CircleFeed({ me }: { me: { fullName: string; businessName: strin
 
   return (
     <div>
-      <div className="-mx-3 overflow-x-auto border-b border-white/8 px-3 pb-4 pt-1 [scrollbar-width:none]">
+      <div className="-mx-3 overflow-x-auto border-b border-white/8 px-3 pb-4 pt-1 [scrollbar-width:none] lg:mx-0 lg:rounded-t-2xl lg:border lg:border-b-0 lg:bg-white/[0.02]">
         <div className="flex min-w-max gap-4">
           <Story label="You" author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl }} plus />
           <Story label="Link'd Up" initialsText="LU" />
@@ -49,7 +50,7 @@ export function CircleFeed({ me }: { me: { fullName: string; businessName: strin
 
       <Composer me={me} onPosted={load} />
 
-      <div className="-mx-3 mt-3 flex border-b border-white/8 px-3">
+      <div className="-mx-3 mt-3 flex border-b border-white/8 px-3 lg:mx-0 lg:border-x lg:border-b-0 lg:bg-white/[0.02] lg:px-4">
         {[['all','All'],['update','Updates'],['ask','Looking for'],['offer','Offering']].map(([key,label]) => (
           <button key={key} onClick={() => setFilter(key)} className={`relative flex-1 py-3 text-xs font-semibold ${filter === key ? 'text-white' : 'text-white/38'}`}>
             {label}
@@ -103,7 +104,7 @@ function Composer({ me, onPosted }: { me: { fullName: string; businessName: stri
     setPosting(false)
   }
 
-  return <div className="-mx-3 border-b border-white/8 bg-white/[0.018] px-3 py-4">
+  return <div className="-mx-3 border-b border-white/8 bg-white/[0.018] px-3 py-4 lg:mx-0 lg:border lg:border-t-0 lg:bg-white/[0.02]">
     <div className="flex gap-3">
       <Avatar author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl }} />
       <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} placeholder="Share something with the Circle..." className="min-h-[58px] flex-1 resize-none bg-transparent pt-1 text-[15px] text-white placeholder:text-white/28 focus:outline-none" />
@@ -121,13 +122,15 @@ function Composer({ me, onPosted }: { me: { fullName: string; businessName: stri
   </div>
 }
 
-function PostCard({ post, onChange }: { post: Post; onChange: () => void }) {
+export function PostCard({ post, onChange }: { post: Post; onChange: () => void }) {
   const [liked, setLiked] = useState(post.likedByMe)
   const [likeCount, setLikeCount] = useState(post.likeCount)
+  const [saved, setSaved] = useState(Boolean(post.savedByMe))
   const [showComments, setShowComments] = useState(false)
   const name = post.author?.fullName || 'Member'
   const subtitle = post.author?.businessName || post.author?.roleOrIndustry
   const kind = KINDS[post.kind] ?? KINDS.update
+  const profileHref = post.author?.id && !post.mine ? `/members/${post.author.id}` : post.mine ? '/profile' : undefined
 
   async function like() {
     setLiked(v => !v); setLikeCount(c => c + (liked ? -1 : 1))
@@ -135,10 +138,25 @@ function PostCard({ post, onChange }: { post: Post; onChange: () => void }) {
     if (res.ok) { const d = await res.json(); setLiked(d.liked); setLikeCount(d.likeCount) }
   }
 
-  return <article className="-mx-3 border-b border-white/8 px-3 py-4">
+  async function save() {
+    setSaved(v => !v)
+    const res = await fetch(`/api/member/posts/${post.id}/save`, { method: 'POST' })
+    if (res.ok) { const d = await res.json(); setSaved(d.saved) }
+  }
+
+  return <article className="-mx-3 border-b border-white/8 px-3 py-4 lg:mx-0 lg:mb-4 lg:rounded-2xl lg:border lg:border-b lg:bg-white/[0.02] lg:last:mb-0">
     <div className="flex items-center gap-3">
-      <Avatar author={post.author} />
-      <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{name}</p><p className="truncate text-[11px] text-white/38">{subtitle ? `${subtitle} · ` : ''}{timeAgo(post.createdAt)}</p></div>
+      {profileHref ? (
+        <Link href={profileHref} className="flex min-w-0 flex-1 items-center gap-3">
+          <Avatar author={post.author} />
+          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{name}</p><p className="truncate text-[11px] text-white/38">{subtitle ? `${subtitle} · ` : ''}{timeAgo(post.createdAt)}</p></div>
+        </Link>
+      ) : (
+        <>
+          <Avatar author={post.author} />
+          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{name}</p><p className="truncate text-[11px] text-white/38">{subtitle ? `${subtitle} · ` : ''}{timeAgo(post.createdAt)}</p></div>
+        </>
+      )}
       {post.kind !== 'update' && <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${kind.cls}`}>{kind.label}</span>}
       <MoreHorizontal size={19} className="text-white/45" />
     </div>
@@ -147,7 +165,8 @@ function PostCard({ post, onChange }: { post: Post; onChange: () => void }) {
     <div className="mt-3 flex items-center gap-5 text-white/70">
       <button onClick={like} className="flex items-center gap-1.5"><Heart size={22} className={liked ? 'fill-[#2d8cff] text-[#2d8cff]' : ''}/>{likeCount > 0 && <span className="text-xs">{likeCount}</span>}</button>
       <button onClick={() => setShowComments(v => !v)} className="flex items-center gap-1.5"><MessageCircle size={22}/>{post.commentCount > 0 && <span className="text-xs">{post.commentCount}</span>}</button>
-      <Send size={21}/><Bookmark size={21} className="ml-auto" />
+      <Send size={21}/>
+      <button onClick={save} className="ml-auto"><Bookmark size={21} className={saved ? 'fill-white text-white' : ''} /></button>
     </div>
     {showComments && <Comments postId={post.id} onAdded={onChange} />}
   </article>

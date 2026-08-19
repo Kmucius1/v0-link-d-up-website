@@ -34,7 +34,7 @@ export default async function HomePage() {
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
   return (
-    <div className="px-3">
+    <div className="px-3 lg:mx-auto lg:max-w-md">
       <div className="pt-3">
         <StatusBar />
       </div>

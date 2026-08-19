@@ -2,8 +2,6 @@ import Link from 'next/link'
 import { requireMember } from '@/lib/member-auth'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { ProfileForm } from '@/components/app/ProfileForm'
-import { NotificationToggle } from '@/components/app/NotificationToggle'
-import { LogoutButton } from '@/components/app/LogoutButton'
 import { ProfileActions } from '@/components/app/ProfileActions'
 import { initials } from '@/lib/format'
 import { Grid3X3, Link2, MapPin, Plus, PlaySquare, UserSquare2 } from 'lucide-react'
@@ -43,10 +41,10 @@ export default async function ProfilePage() {
   const posts = postsResult.data ?? []
 
   return (
-    <div className="pb-6">
+    <div className="pb-6 lg:mx-auto lg:max-w-md">
       <div className="flex items-center justify-between px-4 pb-4 pt-3">
         <div className="text-[22px] font-black tracking-[0.08em] text-white">LINK&apos;D <span className="text-[#2d8cff]">UP</span></div>
-        <Link href="/home" className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-white/70">Menu</Link>
+        <Link href="/settings" className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-white/70">Menu</Link>
       </div>
 
       <section className="px-4">
@@ -151,8 +149,6 @@ export default async function ProfilePage() {
         <h2 className="text-base font-bold text-white">Edit profile</h2>
         <p className="mt-1 text-xs text-white/45">Keep your LINK&apos;D UP profile current so people know how to connect with you.</p>
         <div className="mt-4"><ProfileForm member={member} /></div>
-        <div className="mt-5"><NotificationToggle /></div>
-        <div className="mt-5 border-t border-white/10 pt-5"><LogoutButton /></div>
       </section>
     </div>
   )

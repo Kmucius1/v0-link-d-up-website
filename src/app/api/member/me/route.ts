@@ -34,6 +34,7 @@ export async function PATCH(req: NextRequest) {
       instagram: clean(body.instagram)?.replace(/^@/, '') ?? null,
       website: clean(body.website),
       bio: clean(body.bio),
+      avatarUrl: clean(body.avatarUrl),
       updatedAt: new Date().toISOString(),
     }
     const { error } = await supabaseAdmin.from('members').update(update).eq('id', member.id)
