@@ -3,8 +3,9 @@ import { requireMember } from '@/lib/member-auth'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { ProfileForm } from '@/components/app/ProfileForm'
 import { ProfileActions } from '@/components/app/ProfileActions'
+import { HighlightsRow } from '@/components/app/HighlightsRow'
 import { initials } from '@/lib/format'
-import { Grid3X3, Link2, MapPin, Plus, PlaySquare, UserSquare2 } from 'lucide-react'
+import { Grid3X3, Link2, MapPin, Play, PlaySquare, UserSquare2 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +34,7 @@ export default async function ProfilePage() {
       .limit(6),
     supabaseAdmin
       .from('posts')
-      .select('id,imageUrl,body')
+      .select('id,imageUrl,mediaType,body')
       .eq('memberId', member.id)
       .order('createdAt', { ascending: false })
       .limit(9),
@@ -121,20 +122,7 @@ export default async function ProfilePage() {
         </section>
       )}
 
-      <section className="mt-5 px-4">
-        <div className="flex gap-5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="w-[66px] shrink-0 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/15 bg-[#111720]"><Plus size={26} /></div>
-            <span className="mt-1 block text-[11px] text-white/70">New</span>
-          </div>
-          {['Events', 'Recaps', 'Community', 'Partners'].map((label) => (
-            <div key={label} className="w-[66px] shrink-0 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#587da8] bg-gradient-to-br from-[#14243a] to-[#0d131d] shadow-inner"><Link2 size={22} className="text-[#6fb0ff]" /></div>
-              <span className="mt-1 block text-[11px] text-white/70">{label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <HighlightsRow memberId={member.id} own />
 
       <div className="mt-1 grid grid-cols-3 border-y border-white/10">
         <button className="flex h-12 items-center justify-center border-b-2 border-[#2d8cff] text-white"><Grid3X3 size={22} /></button>
@@ -144,8 +132,13 @@ export default async function ProfilePage() {
 
       <div className="grid grid-cols-3 gap-[2px] bg-[#0b0f16]">
         {posts.length > 0 ? posts.map((post) => (
-          <div key={post.id} className="aspect-square overflow-hidden bg-[#151a22]">
-            {post.imageUrl ? (
+          <div key={post.id} className="relative aspect-square overflow-hidden bg-[#151a22]">
+            {post.imageUrl && post.mediaType === 'video' ? (
+              <>
+                <video src={post.imageUrl} className="h-full w-full object-cover" muted />
+                <Play size={18} className="absolute right-1.5 top-1.5 fill-white text-white drop-shadow" />
+              </>
+            ) : post.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={post.imageUrl} alt="" className="h-full w-full object-cover" />
             ) : (

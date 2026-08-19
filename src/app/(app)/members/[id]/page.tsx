@@ -3,8 +3,9 @@ import { notFound, redirect } from 'next/navigation'
 import { requireMember } from '@/lib/member-auth'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { AppHeader } from '@/components/app/AppHeader'
+import { HighlightsRow } from '@/components/app/HighlightsRow'
 import { initials } from '@/lib/format'
-import { MessageCircle, Link2, MapPin } from 'lucide-react'
+import { MessageCircle, Link2, MapPin, Play } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +23,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
       .maybeSingle(),
     supabaseAdmin
       .from('posts')
-      .select('id, imageUrl, body')
+      .select('id, imageUrl, mediaType, body')
       .eq('memberId', id)
       .order('createdAt', { ascending: false })
       .limit(9),
@@ -81,11 +82,18 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
         </Link>
       </section>
 
+      <HighlightsRow memberId={person.id} />
+
       <div className="mt-6 grid grid-cols-3 gap-[2px] border-t border-white/10 bg-[#0b0f16]">
         {posts && posts.length > 0 ? (
           posts.map((post) => (
-            <div key={post.id} className="aspect-square overflow-hidden bg-[#151a22]">
-              {post.imageUrl ? (
+            <div key={post.id} className="relative aspect-square overflow-hidden bg-[#151a22]">
+              {post.imageUrl && post.mediaType === 'video' ? (
+                <>
+                  <video src={post.imageUrl} className="h-full w-full object-cover" muted />
+                  <Play size={18} className="absolute right-1.5 top-1.5 fill-white text-white drop-shadow" />
+                </>
+              ) : post.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={post.imageUrl} alt="" className="h-full w-full object-cover" />
               ) : (

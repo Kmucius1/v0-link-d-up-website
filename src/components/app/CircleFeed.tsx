@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Bookmark, Heart, ImagePlus, Loader2, MessageCircle, MoreHorizontal, Send, Sparkles, Users, X } from 'lucide-react'
+import { Bookmark, Film, Heart, ImagePlus, Loader2, MessageCircle, MoreHorizontal, Send, Users, X } from 'lucide-react'
 import { initials, timeAgo } from '@/lib/format'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 
 export type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null } | null
-export type Post = { id: string; memberId: string; body: string; imageUrl: string | null; kind: string; createdAt: string; author: Author; likeCount: number; commentCount: number; likedByMe: boolean; mine: boolean; savedByMe?: boolean }
+export type Post = { id: string; memberId: string; body: string; imageUrl: string | null; mediaType: string; aspectRatio: string; kind: string; createdAt: string; author: Author; likeCount: number; commentCount: number; likedByMe: boolean; mine: boolean; savedByMe?: boolean }
 type Comment = { id: string; body: string; createdAt: string; author: Author }
 type Me = { fullName: string; businessName: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null }
 
@@ -14,6 +15,33 @@ const KINDS: Record<string, { label: string; cls: string }> = {
   update: { label: 'Update', cls: 'text-[#8fc4ff] bg-[#2d8cff]/12' },
   ask: { label: 'Looking for', cls: 'text-[#e0e5ec] bg-white/[0.06]' },
   offer: { label: 'Offering', cls: 'text-[#a8d8f0] bg-[#a8d8f0]/10' },
+}
+
+// Matches the aspect ratios Instagram allows for feed posts (square/portrait/landscape)
+// plus the 9:16 vertical ratio used for Stories and Reels.
+export const ASPECT_RATIOS: Record<string, { label: string; css: string }> = {
+  square: { label: 'Square · 1:1', css: '1 / 1' },
+  portrait: { label: 'Portrait · 4:5', css: '4 / 5' },
+  landscape: { label: 'Landscape · 1.91:1', css: '1.91 / 1' },
+  story: { label: 'Story/Reel · 9:16', css: '9 / 16' },
+}
+
+async function uploadMedia(file: File): Promise<{ url: string; mediaType: 'image' | 'video' }> {
+  const mediaType: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image'
+  const signRes = await fetch('/api/member/upload/sign', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
+  })
+  const signData = await signRes.json()
+  if (!signRes.ok) throw new Error(signData.error || 'Could not prepare upload.')
+
+  const { error } = await supabaseBrowser.storage
+    .from(signData.bucket)
+    .uploadToSignedUrl(signData.path, signData.token, file, { contentType: file.type })
+  if (error) throw new Error(error.message || 'Upload failed.')
+
+  return { url: signData.publicUrl, mediaType }
 }
 
 function Avatar({ author, size = 'md' }: { author: Author; size?: 'sm' | 'md' | 'lg' }) {
@@ -90,26 +118,44 @@ function Story({ label, author, initialsText, plus }: { label: string; author?: 
 function Composer({ me, onPosted }: { me: Me; onPosted: () => void }) {
   const [body, setBody] = useState('')
   const [kind, setKind] = useState('update')
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null)
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image')
+  const [aspectRatio, setAspectRatio] = useState('square')
   const [uploading, setUploading] = useState(false)
   const [posting, setPosting] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]; if (!file) return
-    setUploading(true); setError('')
-    const fd = new FormData(); fd.append('file', file)
-    const res = await fetch('/api/member/upload', { method: 'POST', body: fd }); const data = await res.json()
-    if (res.ok) setImageUrl(data.url); else setError(data.error || 'Upload failed.')
-    setUploading(false); if (fileRef.current) fileRef.current.value = ''
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const { url, mediaType: mt } = await uploadMedia(file)
+      setMediaUrl(url)
+      setMediaType(mt)
+      setAspectRatio(mt === 'video' ? 'story' : 'square')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed.')
+    }
+    setUploading(false)
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   async function submit() {
-    if (!body.trim() && !imageUrl) return
+    if (!body.trim() && !mediaUrl) return
     setPosting(true); setError('')
-    const res = await fetch('/api/member/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ body, kind, imageUrl }) })
-    if (res.ok) { setBody(''); setImageUrl(null); setKind('update'); onPosted() } else setError((await res.json().catch(() => ({}))).error || 'Could not post.')
+    const res = await fetch('/api/member/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body, kind, imageUrl: mediaUrl, mediaType, aspectRatio }),
+    })
+    if (res.ok) {
+      setBody(''); setMediaUrl(null); setMediaType('image'); setAspectRatio('square'); setKind('update'); onPosted()
+    } else {
+      setError((await res.json().catch(() => ({}))).error || 'Could not post.')
+    }
     setPosting(false)
   }
 
@@ -118,13 +164,33 @@ function Composer({ me, onPosted }: { me: Me; onPosted: () => void }) {
       <Avatar author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl, avatarPositionX: me.avatarPositionX, avatarPositionY: me.avatarPositionY }} />
       <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} placeholder="Share something with the Circle..." className="min-h-[58px] flex-1 resize-none bg-transparent pt-1 text-[15px] text-white placeholder:text-white/28 focus:outline-none" />
     </div>
-    {imageUrl && <div className="relative mt-3 overflow-hidden rounded-2xl border border-white/10"><img src={imageUrl} alt="attachment" className="max-h-72 w-full object-cover" /><button onClick={() => setImageUrl(null)} className="absolute right-2 top-2 rounded-full bg-black/70 p-1.5"><X size={14}/></button></div>}
+
+    {mediaUrl && (
+      <div className="mt-3">
+        <div className="relative mx-auto max-h-[420px] overflow-hidden rounded-2xl border border-white/10" style={{ aspectRatio: ASPECT_RATIOS[aspectRatio].css }}>
+          {mediaType === 'video' ? (
+            <video src={mediaUrl} className="h-full w-full object-cover" controls playsInline />
+          ) : (
+            <img src={mediaUrl} alt="attachment" className="h-full w-full object-cover" />
+          )}
+          <button onClick={() => { setMediaUrl(null); setMediaType('image'); setAspectRatio('square') }} className="absolute right-2 top-2 rounded-full bg-black/70 p-1.5"><X size={14}/></button>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {Object.entries(ASPECT_RATIOS).map(([key, r]) => (
+            <button key={key} onClick={() => setAspectRatio(key)} className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${aspectRatio === key ? 'bg-[#2d8cff] text-white' : 'bg-white/[0.05] text-white/45'}`}>
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+
     <div className="mt-3 flex items-center gap-2">
       {Object.entries(KINDS).map(([key,m]) => <button key={key} onClick={() => setKind(key)} className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${kind === key ? 'bg-[#2d8cff] text-white' : 'bg-white/[0.05] text-white/42'}`}>{m.label}</button>)}
       <div className="ml-auto flex items-center gap-2">
-        <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
+        <input ref={fileRef} type="file" accept="image/*,video/mp4,video/quicktime,video/webm" onChange={onFile} className="hidden" />
         <button onClick={() => fileRef.current?.click()} className="flex h-9 w-9 items-center justify-center rounded-full text-white/50">{uploading ? <Loader2 size={17} className="animate-spin"/> : <ImagePlus size={19}/>}</button>
-        <button onClick={submit} disabled={posting || (!body.trim() && !imageUrl)} className="flex h-9 items-center gap-1.5 rounded-full bg-[#2d8cff] px-4 text-xs font-bold text-white disabled:opacity-35">{posting ? <Loader2 size={14} className="animate-spin"/> : <Send size={14}/>}Post</button>
+        <button onClick={submit} disabled={posting || (!body.trim() && !mediaUrl)} className="flex h-9 items-center gap-1.5 rounded-full bg-[#2d8cff] px-4 text-xs font-bold text-white disabled:opacity-35">{posting ? <Loader2 size={14} className="animate-spin"/> : <Send size={14}/>}Post</button>
       </div>
     </div>
     {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
@@ -170,7 +236,23 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
       <MoreHorizontal size={19} className="text-white/45" />
     </div>
     {post.body && <p className="mt-3 whitespace-pre-wrap text-[15px] leading-6 text-white/90">{post.body}</p>}
-    {post.imageUrl && <img src={post.imageUrl} alt="" className="-mx-3 mt-3 aspect-square w-[calc(100%+24px)] object-cover" />}
+    {post.imageUrl && (
+      <div
+        className="-mx-3 mt-3 w-[calc(100%+24px)] overflow-hidden bg-black"
+        style={{ aspectRatio: ASPECT_RATIOS[post.aspectRatio]?.css ?? ASPECT_RATIOS.square.css }}
+      >
+        {post.mediaType === 'video' ? (
+          <div className="relative h-full w-full">
+            <video src={post.imageUrl} className="h-full w-full object-cover" controls playsInline />
+            <span className="pointer-events-none absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold text-white">
+              <Film size={11} /> Video
+            </span>
+          </div>
+        ) : (
+          <img src={post.imageUrl} alt="" className="h-full w-full object-cover" />
+        )}
+      </div>
+    )}
     <div className="mt-3 flex items-center gap-5 text-white/70">
       <button onClick={like} className="flex items-center gap-1.5"><Heart size={22} className={liked ? 'fill-[#2d8cff] text-[#2d8cff]' : ''}/>{likeCount > 0 && <span className="text-xs">{likeCount}</span>}</button>
       <button onClick={() => setShowComments(v => !v)} className="flex items-center gap-1.5"><MessageCircle size={22}/>{post.commentCount > 0 && <span className="text-xs">{post.commentCount}</span>}</button>

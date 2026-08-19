@@ -88,6 +88,27 @@ CREATE TABLE IF NOT EXISTS "posts" (
   "createdAt" timestamptz NOT NULL DEFAULT now(),
   "updatedAt" timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "mediaType" text NOT NULL DEFAULT 'image';
+ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "aspectRatio" text NOT NULL DEFAULT 'square';
+
+CREATE TABLE IF NOT EXISTS "highlights" (
+  "id" text PRIMARY KEY,
+  "memberId" text NOT NULL,
+  "title" text NOT NULL,
+  "createdAt" timestamptz NOT NULL DEFAULT now(),
+  "updatedAt" timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS "highlights_memberId_idx" ON "highlights" ("memberId");
+
+CREATE TABLE IF NOT EXISTS "highlight_items" (
+  "id" text PRIMARY KEY,
+  "highlightId" text NOT NULL,
+  "postId" text NOT NULL,
+  "sortOrder" integer NOT NULL DEFAULT 0,
+  "createdAt" timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "highlight_items_highlightId_postId_key" ON "highlight_items" ("highlightId", "postId");
+CREATE INDEX IF NOT EXISTS "highlight_items_highlightId_idx" ON "highlight_items" ("highlightId");
 CREATE INDEX IF NOT EXISTS "posts_createdAt_idx" ON "posts" ("createdAt" DESC);
 CREATE INDEX IF NOT EXISTS "posts_memberId_idx" ON "posts" ("memberId");
 
@@ -202,12 +223,20 @@ async function run() {
     const supabase = createClient(supaUrl, supaKey, { auth: { persistSession: false } })
     const { error } = await supabase.storage.createBucket(bucket, {
       public: true,
-      fileSizeLimit: '8MB',
+      fileSizeLimit: '50MB',
     })
     if (error && !/already exists/i.test(error.message)) {
       console.warn(`! Could not create bucket "${bucket}": ${error.message}`)
     } else {
-      console.log(`✓ Storage bucket "${bucket}" ready (public).`)
+      if (error) {
+        // Bucket already existed — raise its limit so video posts fit.
+        const { error: updateError } = await supabase.storage.updateBucket(bucket, {
+          public: true,
+          fileSizeLimit: '50MB',
+        })
+        if (updateError) console.warn(`! Could not raise "${bucket}" file size limit: ${updateError.message}`)
+      }
+      console.log(`✓ Storage bucket "${bucket}" ready (public, 50MB limit).`)
     }
   } else {
     console.log('• Skipped bucket creation (no SUPABASE_URL / SERVICE_ROLE_KEY in env).')

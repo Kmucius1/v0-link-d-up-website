@@ -5,6 +5,8 @@ import { getMember } from '@/lib/member-auth'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const VALID_KINDS = ['update', 'ask', 'offer']
+const VALID_MEDIA_TYPES = ['image', 'video']
+const VALID_ASPECT_RATIOS = ['square', 'portrait', 'landscape', 'story']
 
 export async function GET() {
   const member = await getMember()
@@ -62,6 +64,8 @@ export async function POST(req: NextRequest) {
     const text: string = (body.body || '').trim()
     const kind: string = VALID_KINDS.includes(body.kind) ? body.kind : 'update'
     const imageUrl: string | null = typeof body.imageUrl === 'string' && body.imageUrl.trim() ? body.imageUrl.trim() : null
+    const mediaType: string = VALID_MEDIA_TYPES.includes(body.mediaType) ? body.mediaType : 'image'
+    const aspectRatio: string = VALID_ASPECT_RATIOS.includes(body.aspectRatio) ? body.aspectRatio : 'square'
     if (!text && !imageUrl) {
       return NextResponse.json({ error: 'Write something or add a photo.' }, { status: 400 })
     }
@@ -75,6 +79,8 @@ export async function POST(req: NextRequest) {
       memberId: member.id,
       body: text,
       imageUrl,
+      mediaType: imageUrl ? mediaType : 'image',
+      aspectRatio,
       kind,
       city: member.city,
       createdAt: now,
