@@ -8,11 +8,9 @@ export default async function CirclePage() {
   const member = await requireMember()
   return (
     <div>
-      <AppHeader title="Growth Circle" subtitle="Post · ask the room · find collaborators" color="#34C759" />
+      <AppHeader title="Growth Circle" subtitle="Post · connect · collaborate" color="#5DA8FF" />
       <div className="px-3">
-        <CircleFeed
-          me={{ fullName: member.fullName, businessName: member.businessName, avatarUrl: member.avatarUrl }}
-        />
+        <CircleFeed me={{ fullName: member.fullName, businessName: member.businessName, avatarUrl: member.avatarUrl }} />
       </div>
     </div>
   )
