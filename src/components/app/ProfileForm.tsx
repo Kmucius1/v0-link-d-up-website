@@ -2,8 +2,8 @@
 
 import { useRef, useState } from 'react'
 import type { Member } from '@/lib/member-auth'
-import { initials } from '@/lib/format'
-import { Loader2, Check, Camera } from 'lucide-react'
+import { AvatarPositioner } from '@/components/app/AvatarPositioner'
+import { Loader2, Check } from 'lucide-react'
 
 const fields: { key: keyof Member; label: string; placeholder: string; full?: boolean }[] = [
   { key: 'firstName', label: 'First name', placeholder: 'Jordan' },
@@ -23,6 +23,7 @@ export function ProfileForm({ member }: { member: Member }) {
     init.avatarUrl = member.avatarUrl ?? ''
     return init
   })
+  const [avatarPos, setAvatarPos] = useState({ x: member.avatarPositionX ?? 50, y: member.avatarPositionY ?? 50 })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -34,13 +35,13 @@ export function ProfileForm({ member }: { member: Member }) {
     setSaved(false)
   }
 
-  async function save(overrides?: Record<string, string>) {
+  async function save(overrides?: Record<string, string | number>) {
     setSaving(true)
     setError('')
     const res = await fetch('/api/member/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, ...overrides }),
+      body: JSON.stringify({ ...form, avatarPositionX: avatarPos.x, avatarPositionY: avatarPos.y, ...overrides }),
     })
     setSaving(false)
     if (res.ok) {
@@ -62,7 +63,8 @@ export function ProfileForm({ member }: { member: Member }) {
     const data = await res.json().catch(() => ({}))
     if (res.ok) {
       setForm((p) => ({ ...p, avatarUrl: data.url }))
-      await save({ avatarUrl: data.url })
+      setAvatarPos({ x: 50, y: 50 })
+      await save({ avatarUrl: data.url, avatarPositionX: 50, avatarPositionY: 50 })
     } else {
       setError(data.error || 'Could not upload photo.')
     }
@@ -72,34 +74,18 @@ export function ProfileForm({ member }: { member: Member }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#22324a] to-[#121722] text-xl font-bold text-white ring-1 ring-white/10">
-            {form.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={form.avatarUrl} alt="Profile photo" className="h-full w-full object-cover" />
-            ) : (
-              initials(`${form.firstName} ${form.lastName}`.trim() || 'Member')
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => avatarInputRef.current?.click()}
-            disabled={uploadingAvatar}
-            aria-label="Change profile photo"
-            className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#121720] bg-[#2d8cff] text-white disabled:opacity-60"
-          >
-            {uploadingAvatar ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />}
-          </button>
-          <input ref={avatarInputRef} type="file" accept="image/*" onChange={onAvatarFile} className="hidden" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-white">Profile photo</p>
-          <button type="button" onClick={() => avatarInputRef.current?.click()} className="text-xs font-medium text-[#5da8ff]">
-            Change photo
-          </button>
-        </div>
-      </div>
+      <AvatarPositioner
+        src={form.avatarUrl || null}
+        name={`${form.firstName} ${form.lastName}`.trim()}
+        positionX={avatarPos.x}
+        positionY={avatarPos.y}
+        onPositionChange={(x, y) => setAvatarPos({ x, y })}
+        onPositionCommit={(x, y) => save({ avatarPositionX: x, avatarPositionY: y })}
+        onPickPhoto={() => avatarInputRef.current?.click()}
+        uploading={uploadingAvatar}
+        size={80}
+      />
+      <input ref={avatarInputRef} type="file" accept="image/*" onChange={onAvatarFile} className="hidden" />
 
       <div className="grid grid-cols-2 gap-3">
         {fields.map((f) => (

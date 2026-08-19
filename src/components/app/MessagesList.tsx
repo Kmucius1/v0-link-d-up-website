@@ -10,7 +10,7 @@ type Conversation = {
   lastBody: string
   lastCreatedAt: string
   unreadCount: number
-  member: { id: string; fullName: string; businessName: string | null; avatarUrl: string | null } | null
+  member: { id: string; fullName: string; businessName: string | null; avatarUrl: string | null; avatarPositionX: number | null; avatarPositionY: number | null } | null
 }
 
 export function MessagesList() {
@@ -53,7 +53,12 @@ export function MessagesList() {
           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#22324a] to-[#121722] text-sm font-bold text-white ring-1 ring-white/10">
             {c.member?.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={c.member.avatarUrl} alt={c.member.fullName} className="h-full w-full object-cover" />
+              <img
+                src={c.member.avatarUrl}
+                alt={c.member.fullName}
+                className="h-full w-full object-cover"
+                style={{ objectPosition: `${c.member.avatarPositionX ?? 50}% ${c.member.avatarPositionY ?? 50}%` }}
+              />
             ) : (
               initials(c.member?.fullName || 'Member')
             )}

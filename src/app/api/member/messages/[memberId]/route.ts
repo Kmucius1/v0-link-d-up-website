@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ memb
 
   const { data: counterpart } = await supabaseAdmin
     .from('members')
-    .select('id, fullName, businessName, roleOrIndustry, avatarUrl')
+    .select('id, fullName, businessName, roleOrIndustry, avatarUrl, avatarPositionX, avatarPositionY')
     .eq('id', counterpartId)
     .maybeSingle()
   if (!counterpart) return NextResponse.json({ error: 'Member not found.' }, { status: 404 })

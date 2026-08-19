@@ -14,6 +14,8 @@ type SuggestedMember = {
   businessName: string | null
   roleOrIndustry: string | null
   avatarUrl: string | null
+  avatarPositionX: number | null
+  avatarPositionY: number | null
   instagram: string | null
   website: string | null
 }
@@ -25,7 +27,7 @@ export default async function ProfilePage() {
     supabaseAdmin.from('posts').select('*', { count: 'exact', head: true }).eq('memberId', member.id),
     supabaseAdmin
       .from('members')
-      .select('id,fullName,businessName,roleOrIndustry,avatarUrl,instagram,website')
+      .select('id,fullName,businessName,roleOrIndustry,avatarUrl,avatarPositionX,avatarPositionY,instagram,website')
       .neq('id', member.id)
       .eq('status', 'active')
       .limit(6),
@@ -53,7 +55,12 @@ export default async function ProfilePage() {
             <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#121722] text-2xl font-bold text-white">
               {member.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={member.avatarUrl} alt={member.fullName} className="h-full w-full object-cover" />
+                <img
+                  src={member.avatarUrl}
+                  alt={member.fullName}
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: `${member.avatarPositionX ?? 50}% ${member.avatarPositionY ?? 50}%` }}
+                />
               ) : initials(member.fullName)}
             </div>
           </div>
@@ -94,7 +101,12 @@ export default async function ProfilePage() {
                   <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#22324a] to-[#121722] text-lg font-bold text-white">
                     {person.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={person.avatarUrl} alt={person.fullName} className="h-full w-full object-cover" />
+                      <img
+                        src={person.avatarUrl}
+                        alt={person.fullName}
+                        className="h-full w-full object-cover"
+                        style={{ objectPosition: `${person.avatarPositionX ?? 50}% ${person.avatarPositionY ?? 50}%` }}
+                      />
                     ) : initials(person.fullName)}
                   </div>
                   <p className="mt-2 truncate text-sm font-semibold text-white">{person.fullName}</p>

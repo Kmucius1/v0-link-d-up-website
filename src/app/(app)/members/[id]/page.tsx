@@ -17,7 +17,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
   const [{ data: person }, { data: posts }] = await Promise.all([
     supabaseAdmin
       .from('members')
-      .select('id, fullName, businessName, roleOrIndustry, city, bio, instagram, website, avatarUrl, status')
+      .select('id, fullName, businessName, roleOrIndustry, city, bio, instagram, website, avatarUrl, avatarPositionX, avatarPositionY, status')
       .eq('id', id)
       .maybeSingle(),
     supabaseAdmin
@@ -38,7 +38,12 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
           <div className="flex h-[94px] w-[94px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#22324a] to-[#121722] text-2xl font-bold text-white ring-1 ring-white/10">
             {person.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={person.avatarUrl} alt={person.fullName} className="h-full w-full object-cover" />
+              <img
+                src={person.avatarUrl}
+                alt={person.fullName}
+                className="h-full w-full object-cover"
+                style={{ objectPosition: `${person.avatarPositionX ?? 50}% ${person.avatarPositionY ?? 50}%` }}
+              />
             ) : (
               initials(person.fullName)
             )}

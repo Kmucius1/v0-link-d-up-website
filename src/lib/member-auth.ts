@@ -19,6 +19,8 @@ export type Member = {
   website: string | null
   bio: string | null
   avatarUrl: string | null
+  avatarPositionX: number
+  avatarPositionY: number
   contactId: string | null
   status: string
   role: string
@@ -26,7 +28,7 @@ export type Member = {
 }
 
 const MEMBER_PUBLIC_FIELDS =
-  'id, email, firstName, lastName, fullName, businessName, roleOrIndustry, city, instagram, website, bio, avatarUrl, contactId, status, role, createdAt'
+  'id, email, firstName, lastName, fullName, businessName, roleOrIndustry, city, instagram, website, bio, avatarUrl, avatarPositionX, avatarPositionY, contactId, status, role, createdAt'
 
 /** Returns the signed-in member (never includes the password hash), or null. Never redirects. */
 export async function getMember(): Promise<Member | null> {

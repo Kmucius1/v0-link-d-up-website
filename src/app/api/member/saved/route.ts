@@ -23,7 +23,7 @@ export async function GET() {
   const [{ data: members }, { data: likes }, { data: comments }] = await Promise.all([
     supabaseAdmin
       .from('members')
-      .select('id, firstName, fullName, businessName, roleOrIndustry, instagram, avatarUrl')
+      .select('id, firstName, fullName, businessName, roleOrIndustry, instagram, avatarUrl, avatarPositionX, avatarPositionY')
       .in('id', memberIds),
     supabaseAdmin.from('post_likes').select('postId, memberId').in('postId', postIds),
     supabaseAdmin.from('post_comments').select('postId').in('postId', postIds),

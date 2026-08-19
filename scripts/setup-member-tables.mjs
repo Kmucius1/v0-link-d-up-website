@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS "members" (
 );
 ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "resetToken" text;
 ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "resetTokenExpiresAt" timestamptz;
+ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "avatarPositionX" real NOT NULL DEFAULT 50;
+ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "avatarPositionY" real NOT NULL DEFAULT 50;
 
 CREATE TABLE IF NOT EXISTS "posts" (
   "id" text PRIMARY KEY,

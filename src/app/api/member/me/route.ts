@@ -10,6 +10,12 @@ function clean(v: unknown): string | null {
   return t.length ? t : null
 }
 
+function clampPercent(v: unknown, fallback: number): number {
+  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN
+  if (!Number.isFinite(n)) return fallback
+  return Math.min(100, Math.max(0, n))
+}
+
 export async function GET() {
   const member = await getMember()
   if (!member) return NextResponse.json({ member: null }, { status: 401 })
@@ -35,6 +41,8 @@ export async function PATCH(req: NextRequest) {
       website: clean(body.website),
       bio: clean(body.bio),
       avatarUrl: clean(body.avatarUrl),
+      avatarPositionX: clampPercent(body.avatarPositionX, member.avatarPositionX ?? 50),
+      avatarPositionY: clampPercent(body.avatarPositionY, member.avatarPositionY ?? 50),
       updatedAt: new Date().toISOString(),
     }
     const { error } = await supabaseAdmin.from('members').update(update).eq('id', member.id)

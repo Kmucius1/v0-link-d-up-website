@@ -38,7 +38,7 @@ export async function GET() {
   const counterpartIds = [...byCounterpart.keys()]
   const { data: members } = await supabaseAdmin
     .from('members')
-    .select('id, fullName, businessName, avatarUrl')
+    .select('id, fullName, businessName, avatarUrl, avatarPositionX, avatarPositionY')
     .in('id', counterpartIds)
   const memberMap = new Map((members ?? []).map((m) => [m.id, m]))
 

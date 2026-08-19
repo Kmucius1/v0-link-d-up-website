@@ -5,9 +5,10 @@ import Link from 'next/link'
 import { Bookmark, Heart, ImagePlus, Loader2, MessageCircle, MoreHorizontal, Send, Sparkles, Users, X } from 'lucide-react'
 import { initials, timeAgo } from '@/lib/format'
 
-export type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null } | null
+export type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null } | null
 export type Post = { id: string; memberId: string; body: string; imageUrl: string | null; kind: string; createdAt: string; author: Author; likeCount: number; commentCount: number; likedByMe: boolean; mine: boolean; savedByMe?: boolean }
 type Comment = { id: string; body: string; createdAt: string; author: Author }
+type Me = { fullName: string; businessName: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null }
 
 const KINDS: Record<string, { label: string; cls: string }> = {
   update: { label: 'Update', cls: 'text-[#8fc4ff] bg-[#2d8cff]/12' },
@@ -18,11 +19,19 @@ const KINDS: Record<string, { label: string; cls: string }> = {
 function Avatar({ author, size = 'md' }: { author: Author; size?: 'sm' | 'md' | 'lg' }) {
   const name = author?.fullName || 'Member'
   const s = size === 'lg' ? 'h-14 w-14 text-base' : size === 'sm' ? 'h-8 w-8 text-[10px]' : 'h-10 w-10 text-sm'
-  if (author?.avatarUrl) return <img src={author.avatarUrl} alt={name} className={`${s} rounded-full object-cover ring-1 ring-white/10`} />
+  if (author?.avatarUrl)
+    return (
+      <img
+        src={author.avatarUrl}
+        alt={name}
+        className={`${s} rounded-full object-cover ring-1 ring-white/10`}
+        style={{ objectPosition: `${author.avatarPositionX ?? 50}% ${author.avatarPositionY ?? 50}%` }}
+      />
+    )
   return <div className={`${s} flex items-center justify-center rounded-full bg-[linear-gradient(145deg,#26364d,#626f86)] font-semibold text-white`}>{initials(name)}</div>
 }
 
-export function CircleFeed({ me }: { me: { fullName: string; businessName: string | null; avatarUrl: string | null } }) {
+export function CircleFeed({ me }: { me: Me }) {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -40,7 +49,7 @@ export function CircleFeed({ me }: { me: { fullName: string; businessName: strin
     <div>
       <div className="-mx-3 overflow-x-auto border-b border-white/8 px-3 pb-4 pt-1 [scrollbar-width:none] lg:mx-0 lg:rounded-t-2xl lg:border lg:border-b-0 lg:bg-white/[0.02]">
         <div className="flex min-w-max gap-4">
-          <Story label="You" author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl }} plus />
+          <Story label="You" author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl, avatarPositionX: me.avatarPositionX, avatarPositionY: me.avatarPositionY }} plus />
           <Story label="Link'd Up" initialsText="LU" />
           <Story label="Creators" initialsText="CR" />
           <Story label="Founders" initialsText="FD" />
@@ -78,7 +87,7 @@ function Story({ label, author, initialsText, plus }: { label: string; author?: 
   </div>
 }
 
-function Composer({ me, onPosted }: { me: { fullName: string; businessName: string | null; avatarUrl: string | null }; onPosted: () => void }) {
+function Composer({ me, onPosted }: { me: Me; onPosted: () => void }) {
   const [body, setBody] = useState('')
   const [kind, setKind] = useState('update')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -106,7 +115,7 @@ function Composer({ me, onPosted }: { me: { fullName: string; businessName: stri
 
   return <div className="-mx-3 border-b border-white/8 bg-white/[0.018] px-3 py-4 lg:mx-0 lg:border lg:border-t-0 lg:bg-white/[0.02]">
     <div className="flex gap-3">
-      <Avatar author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl }} />
+      <Avatar author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl, avatarPositionX: me.avatarPositionX, avatarPositionY: me.avatarPositionY }} />
       <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} placeholder="Share something with the Circle..." className="min-h-[58px] flex-1 resize-none bg-transparent pt-1 text-[15px] text-white placeholder:text-white/28 focus:outline-none" />
     </div>
     {imageUrl && <div className="relative mt-3 overflow-hidden rounded-2xl border border-white/10"><img src={imageUrl} alt="attachment" className="max-h-72 w-full object-cover" /><button onClick={() => setImageUrl(null)} className="absolute right-2 top-2 rounded-full bg-black/70 p-1.5"><X size={14}/></button></div>}

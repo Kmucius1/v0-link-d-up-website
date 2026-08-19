@@ -17,7 +17,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const memberIds = [...new Set((comments ?? []).map((c) => c.memberId))]
   const { data: members } = memberIds.length
-    ? await supabaseAdmin.from('members').select('id, fullName, businessName, avatarUrl').in('id', memberIds)
+    ? await supabaseAdmin.from('members').select('id, fullName, businessName, avatarUrl, avatarPositionX, avatarPositionY').in('id', memberIds)
     : { data: [] }
   const map = new Map((members ?? []).map((m) => [m.id, m]))
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         memberId: member.id,
         body: text,
         createdAt: new Date().toISOString(),
-        author: { id: member.id, fullName: member.fullName, businessName: member.businessName, avatarUrl: member.avatarUrl },
+        author: { id: member.id, fullName: member.fullName, businessName: member.businessName, avatarUrl: member.avatarUrl, avatarPositionX: member.avatarPositionX, avatarPositionY: member.avatarPositionY },
       },
     })
   } catch (err) {
