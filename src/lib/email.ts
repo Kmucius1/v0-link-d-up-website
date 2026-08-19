@@ -11,6 +11,52 @@ function getFrom() {
     : "LINK'D UP <linkdup@drypdigital.com>"
 }
 
+export async function sendMemberWelcome({
+  to,
+  name,
+}: {
+  to: string
+  name: string
+}) {
+  return getResend().emails.send({
+    from: getFrom(),
+    to,
+    subject: `Welcome to LINK'D UP, ${name} 🎉`,
+    html: `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:40px auto;background:#111;border-radius:16px;overflow:hidden;border:1px solid #222;">
+    <div style="background:#000;">
+      <img src="https://www.linkdup.club/images/hero-banner.png" alt="LINK'D UP" width="560" style="width:100%;max-width:560px;height:auto;display:block;" />
+    </div>
+    <div style="padding:36px 32px;">
+      <p style="color:#e2e8f0;font-size:16px;margin:0 0 24px;">Hey ${name} 👋</p>
+      <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 20px;">
+        You're in. Welcome to <strong style="color:#c084fc;">LINK'D UP</strong> — the Growth Circle where creators, entrepreneurs, and builders post, connect, and collaborate.
+      </p>
+      <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 28px;">
+        Head into the app to complete your profile, drop your first post, and start finding the right people for what you're building.
+      </p>
+      <div style="text-align:center;margin:32px 0;">
+        <a href="https://www.linkdup.club/home" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a21caf);color:#fff;font-weight:700;font-size:15px;padding:16px 36px;border-radius:12px;text-decoration:none;letter-spacing:0.3px;">
+          Open LINK'D UP →
+        </a>
+      </div>
+      <p style="color:#334155;font-size:13px;line-height:1.6;margin:0;">
+        The bigger the room, the bigger the opportunity. Glad you're here.
+      </p>
+    </div>
+    <div style="padding:20px 32px;border-top:1px solid #1e1e1e;text-align:center;">
+      <p style="color:#334155;font-size:12px;margin:0;">LINK'D UP by DRYP Digital · <a href="https://www.linkdup.club" style="color:#7c3aed;text-decoration:none;">linkdup.club</a></p>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim(),
+  })
+}
+
 export async function sendRsvpConfirmation({
   to,
   name,

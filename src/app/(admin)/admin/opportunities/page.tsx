@@ -97,8 +97,8 @@ export default async function OpportunitiesPage({
           <p className="text-zinc-600 text-sm mt-1">Opportunities are added from contact cards when someone is flagged as a potential sponsor, vendor, speaker, etc.</p>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[680px] text-sm">
             <thead>
               <tr className="border-b border-zinc-800">
                 <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Contact</th>

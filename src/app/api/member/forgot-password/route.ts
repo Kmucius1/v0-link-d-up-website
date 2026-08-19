@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createPasswordResetToken } from '@/lib/member-auth'
 import { sendPasswordReset } from '@/lib/email'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { APP_URL } from '@/lib/resend'
 
 export async function POST(req: NextRequest) {
@@ -14,11 +15,33 @@ export async function POST(req: NextRequest) {
 
     const result = await createPasswordResetToken(email)
     if (result) {
+      const to = email.toLowerCase().trim()
       const resetUrl = `${APP_URL}/reset-password?token=${result.token}`
+      const subject = "Reset your password — LINK'D UP"
       try {
-        await sendPasswordReset({ to: email.toLowerCase().trim(), name: result.firstName, resetUrl })
+        const { error: sendError } = await sendPasswordReset({ to, name: result.firstName, resetUrl })
+        if (sendError) throw new Error(sendError.message)
+        if (result.contactId) {
+          await supabaseAdmin.from('email_logs').insert({
+            id: crypto.randomUUID(),
+            contactId: result.contactId,
+            emailType: 'password_reset',
+            subject,
+            status: 'sent',
+          })
+        }
       } catch (e) {
         console.error('[member/forgot-password] send failed', e)
+        if (result.contactId) {
+          await supabaseAdmin.from('email_logs').insert({
+            id: crypto.randomUUID(),
+            contactId: result.contactId,
+            emailType: 'password_reset',
+            subject,
+            status: 'failed',
+            errorMessage: e instanceof Error ? e.message : 'Email delivery failed',
+          })
+        }
       }
     }
 

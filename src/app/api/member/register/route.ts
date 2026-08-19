@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { MEMBER_COOKIE } from '@/lib/member-auth'
+import { sendMemberWelcome } from '@/lib/email'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
 
@@ -126,6 +127,28 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 60,
       path: '/',
     })
+
+    try {
+      const { error: sendError } = await sendMemberWelcome({ to: email, name: firstName })
+      if (sendError) throw new Error(sendError.message)
+      if (contactId) await supabaseAdmin.from('email_logs').insert({
+        id: crypto.randomUUID(),
+        contactId,
+        emailType: 'welcome',
+        subject: `Welcome to LINK'D UP, ${firstName} 🎉`,
+        status: 'sent',
+      })
+    } catch (sendErr) {
+      console.error('[member/register] welcome email failed', sendErr)
+      if (contactId) await supabaseAdmin.from('email_logs').insert({
+        id: crypto.randomUUID(),
+        contactId,
+        emailType: 'welcome',
+        subject: `Welcome to LINK'D UP, ${firstName} 🎉`,
+        status: 'failed',
+        errorMessage: sendErr instanceof Error ? sendErr.message : 'Email delivery failed',
+      })
+    }
 
     return NextResponse.json({ ok: true, id, fullName })
   } catch (err) {

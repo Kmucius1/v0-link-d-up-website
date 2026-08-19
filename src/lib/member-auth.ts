@@ -74,10 +74,12 @@ function hashResetToken(token: string): string {
  * Returns the raw token (to put in the email link) or null if no such member —
  * callers should respond identically either way to avoid leaking which emails are registered.
  */
-export async function createPasswordResetToken(email: string): Promise<{ token: string; firstName: string } | null> {
+export async function createPasswordResetToken(
+  email: string
+): Promise<{ token: string; firstName: string; contactId: string | null } | null> {
   const { data } = await supabaseAdmin
     .from('members')
-    .select('id, firstName')
+    .select('id, firstName, contactId')
     .eq('email', email.toLowerCase().trim())
     .maybeSingle()
   if (!data) return null
@@ -89,7 +91,7 @@ export async function createPasswordResetToken(email: string): Promise<{ token: 
     .update({ resetToken: hashResetToken(token), resetTokenExpiresAt: expiresAt })
     .eq('id', data.id)
 
-  return { token, firstName: data.firstName }
+  return { token, firstName: data.firstName, contactId: data.contactId }
 }
 
 /** Validates a reset token and, if valid, sets the new password. Consumes the token either way. */
