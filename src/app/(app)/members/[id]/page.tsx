@@ -113,7 +113,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
       <div className="mt-6 grid grid-cols-3 gap-[2px] border-t border-white/10 bg-[#0b0f16]">
         {posts && posts.length > 0 ? (
           posts.map((post) => (
-            <div key={post.id} className="relative aspect-square overflow-hidden bg-[#151a22]">
+            <Link key={post.id} href={`/circle/post/${post.id}`} className="relative aspect-square overflow-hidden bg-[#151a22]">
               {post.imageUrl && post.mediaType === 'video' ? (
                 <>
                   <video src={post.imageUrl} className="h-full w-full object-cover" muted />
@@ -127,7 +127,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                   {post.body?.slice(0, 95)}
                 </div>
               )}
-            </div>
+            </Link>
           ))
         ) : (
           <div className="col-span-3 py-12 text-center text-sm text-white/40">No posts yet.</div>

@@ -130,7 +130,7 @@ export default async function ProfilePage() {
 
       <div className="grid grid-cols-3 gap-[2px] bg-[#0b0f16]">
         {posts.length > 0 ? posts.map((post) => (
-          <div key={post.id} className="relative aspect-square overflow-hidden bg-[#151a22]">
+          <Link key={post.id} href={`/circle/post/${post.id}`} className="relative aspect-square overflow-hidden bg-[#151a22]">
             {post.imageUrl && post.mediaType === 'video' ? (
               <>
                 <video src={post.imageUrl} className="h-full w-full object-cover" muted />
@@ -142,7 +142,7 @@ export default async function ProfilePage() {
             ) : (
               <div className="flex h-full items-center justify-center p-3 text-center text-[10px] leading-4 text-white/65">{post.body?.slice(0, 95)}</div>
             )}
-          </div>
+          </Link>
         )) : (
           <div className="col-span-3 py-12 text-center text-sm text-white/40">Your posts will show here.</div>
         )}
