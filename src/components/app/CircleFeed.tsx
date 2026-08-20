@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Bookmark, Film, Heart, ImagePlus, Loader2, MessageCircle, MoreHorizontal, Send, Users, X } from 'lucide-react'
 import { initials, timeAgo } from '@/lib/format'
 import { supabaseBrowser } from '@/lib/supabase-browser'
@@ -126,6 +127,20 @@ function Composer({ me, onPosted }: { me: Me; onPosted: () => void }) {
   const [posting, setPosting] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const searchParams = useSearchParams()
+  const composeIntent = searchParams.get('compose')
+
+  useEffect(() => {
+    if (!composeIntent) return
+    textareaRef.current?.focus()
+    textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (composeIntent === 'story' || composeIntent === 'reel') {
+      setAspectRatio('story')
+      fileRef.current?.click()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [composeIntent])
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -163,7 +178,7 @@ function Composer({ me, onPosted }: { me: Me; onPosted: () => void }) {
   return <div className="-mx-3 border-b border-white/8 bg-white/[0.018] px-3 py-4 lg:mx-0 lg:border lg:border-t-0 lg:bg-white/[0.02]">
     <div className="flex gap-3">
       <Avatar author={{ fullName: me.fullName, businessName: me.businessName, avatarUrl: me.avatarUrl, avatarPositionX: me.avatarPositionX, avatarPositionY: me.avatarPositionY }} />
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} placeholder="Share something with the Circle..." className="min-h-[58px] flex-1 resize-none bg-transparent pt-1 text-[15px] text-white placeholder:text-white/28 focus:outline-none" />
+      <textarea ref={textareaRef} value={body} onChange={(e) => setBody(e.target.value)} rows={2} placeholder="Share something with the Circle..." className="min-h-[58px] flex-1 resize-none bg-transparent pt-1 text-[15px] text-white placeholder:text-white/28 focus:outline-none" />
     </div>
 
     {mediaUrl && (

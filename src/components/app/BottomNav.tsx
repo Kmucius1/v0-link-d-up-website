@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Plus, Bell, UserRound } from 'lucide-react'
+import { Home, Search, Bell, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CreateMenu } from './CreateMenu'
 
 const tabs = [
   { href: '/home', label: 'Home', icon: Home },
@@ -28,13 +29,7 @@ export function BottomNav() {
           )
         })}
 
-        <Link
-          href="/circle"
-          aria-label="Create post"
-          className="-mt-2 flex h-[52px] w-[52px] items-center justify-center rounded-2xl border border-[#78b9ff]/55 bg-gradient-to-b from-[#268cff] to-[#0c63dd] shadow-[0_8px_28px_rgba(27,128,255,.35)] active:scale-95"
-        >
-          <Plus size={30} strokeWidth={2.2} />
-        </Link>
+        <CreateMenu />
 
         {tabs.slice(2).map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/')
