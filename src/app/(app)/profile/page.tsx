@@ -24,8 +24,13 @@ type SuggestedMember = {
 export default async function ProfilePage() {
   const member = await requireMember()
 
-  const [{ count: postCount }, suggestionsResult, postsResult] = await Promise.all([
+  const [{ count: postCount }, { count: linkCount }, suggestionsResult, postsResult] = await Promise.all([
     supabaseAdmin.from('posts').select('*', { count: 'exact', head: true }).eq('memberId', member.id),
+    supabaseAdmin
+      .from('connections')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'accepted')
+      .or(`requesterId.eq.${member.id},recipientId.eq.${member.id}`),
     supabaseAdmin
       .from('members')
       .select('id,fullName,businessName,roleOrIndustry,avatarUrl,avatarPositionX,avatarPositionY,instagram,website')
@@ -68,7 +73,7 @@ export default async function ProfilePage() {
 
           <div className="grid flex-1 grid-cols-3 text-center">
             <div><div className="text-lg font-bold text-white">{postCount ?? 0}</div><div className="text-[11px] text-white/45">Posts</div></div>
-            <div><div className="text-lg font-bold text-white">{suggestions.length}</div><div className="text-[11px] text-white/45">People</div></div>
+            <div><div className="text-lg font-bold text-white">{linkCount ?? 0}</div><div className="text-[11px] text-white/45">Links</div></div>
             <div><div className="text-lg font-bold text-white">LINK&apos;D</div><div className="text-[11px] text-white/45">Member</div></div>
           </div>
         </div>
@@ -91,33 +96,26 @@ export default async function ProfilePage() {
             <Link href="/circle" className="text-xs font-semibold text-[#4c9dff]">See all</Link>
           </div>
           <div className="mt-3 flex gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {suggestions.map((person) => {
-              const target = person.instagram
-                ? `https://instagram.com/${person.instagram.replace(/^@/, '')}`
-                : person.website
-                  ? (person.website.startsWith('http') ? person.website : `https://${person.website}`)
-                  : '/circle'
-              return (
-                <div key={person.id} className="w-[150px] shrink-0 rounded-2xl border border-white/10 bg-[#151a22] p-3 text-center shadow-lg">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#22324a] to-[#121722] text-lg font-bold text-white">
-                    {person.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={person.avatarUrl}
-                        alt={person.fullName}
-                        className="h-full w-full object-cover"
-                        style={{ objectPosition: `${person.avatarPositionX ?? 50}% ${person.avatarPositionY ?? 50}%` }}
-                      />
-                    ) : initials(person.fullName)}
-                  </div>
-                  <p className="mt-2 truncate text-sm font-semibold text-white">{person.fullName}</p>
-                  <p className="h-4 truncate text-[11px] text-white/45">{person.businessName || person.roleOrIndustry || 'LINK’D UP'}</p>
-                  <a href={target} target={target.startsWith('http') ? '_blank' : undefined} rel={target.startsWith('http') ? 'noreferrer' : undefined} className="mt-3 flex h-8 items-center justify-center rounded-lg bg-[#1877f2] px-3 text-xs font-bold text-white active:bg-[#0d66d6]">
-                    Get Link&apos;d
-                  </a>
+            {suggestions.map((person) => (
+              <Link key={person.id} href={`/members/${person.id}`} className="w-[150px] shrink-0 rounded-2xl border border-white/10 bg-[#151a22] p-3 text-center shadow-lg">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#22324a] to-[#121722] text-lg font-bold text-white">
+                  {person.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={person.avatarUrl}
+                      alt={person.fullName}
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: `${person.avatarPositionX ?? 50}% ${person.avatarPositionY ?? 50}%` }}
+                    />
+                  ) : initials(person.fullName)}
                 </div>
-              )
-            })}
+                <p className="mt-2 truncate text-sm font-semibold text-white">{person.fullName}</p>
+                <p className="h-4 truncate text-[11px] text-white/45">{person.businessName || person.roleOrIndustry || 'LINK’D UP'}</p>
+                <span className="mt-3 flex h-8 items-center justify-center rounded-lg bg-[#1877f2] px-3 text-xs font-bold text-white">
+                  Get Link&apos;d
+                </span>
+              </Link>
+            ))}
           </div>
         </section>
       )}
