@@ -112,7 +112,7 @@ export default function Home() {
         <div className="bg-[#171717] border border-[#7F90A8]/20 rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-3 gap-8">
           <div>
             <p className="text-[#7F90A8] text-xs font-semibold tracking-[0.2em] uppercase mb-3">Date</p>
-            <p className="text-[#F7F7F7] text-xl font-semibold">Thursday, July 16</p>
+            <p className="text-[#F7F7F7] text-xl font-semibold">Thursday, August 20</p>
             <p className="text-[#AEB9C8] text-sm mt-1">6:00 PM – 8:30 PM</p>
           </div>
           <div>

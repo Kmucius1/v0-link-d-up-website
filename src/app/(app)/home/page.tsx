@@ -23,7 +23,7 @@ export default async function HomePage() {
     supabaseAdmin
       .from('events')
       .select('eventName, eventDate, locationName, startTime')
-      .eq('status', 'published')
+      .eq('status', 'live')
       .gte('eventDate', new Date().toISOString())
       .order('eventDate', { ascending: true })
       .limit(1)
