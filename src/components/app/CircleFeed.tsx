@@ -221,8 +221,13 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
   const [showComments, setShowComments] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editBody, setEditBody] = useState(post.body)
+  const [editImageUrl, setEditImageUrl] = useState<string | null>(post.imageUrl)
+  const [editMediaType, setEditMediaType] = useState<'image' | 'video'>((post.mediaType as 'image' | 'video') ?? 'image')
+  const [editAspectRatio, setEditAspectRatio] = useState(post.aspectRatio)
+  const [editUploading, setEditUploading] = useState(false)
   const [savingEdit, setSavingEdit] = useState(false)
   const [shareMsg, setShareMsg] = useState('')
+  const editFileRef = useRef<HTMLInputElement>(null)
   const name = post.author?.fullName || 'Member'
   const subtitle = post.author?.businessName || post.author?.roleOrIndustry
   const kind = KINDS[post.kind] ?? KINDS.update
@@ -240,13 +245,34 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
     if (res.ok) { const d = await res.json(); setSaved(d.saved) }
   }
 
+  async function onEditFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setEditUploading(true)
+    try {
+      const { url, mediaType: mt } = await uploadMedia(file)
+      setEditImageUrl(url)
+      setEditMediaType(mt)
+      setEditAspectRatio(mt === 'video' ? 'story' : 'square')
+    } catch {
+      // upload failed silently — image stays as it was
+    }
+    setEditUploading(false)
+    if (editFileRef.current) editFileRef.current.value = ''
+  }
+
   async function saveEdit() {
-    if (!editBody.trim()) return
+    if (!editBody.trim() && !editImageUrl) return
     setSavingEdit(true)
     const res = await fetch(`/api/member/posts/${post.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ body: editBody.trim() }),
+      body: JSON.stringify({
+        body: editBody.trim(),
+        imageUrl: editImageUrl,
+        mediaType: editMediaType,
+        aspectRatio: editAspectRatio,
+      }),
     })
     setSavingEdit(false)
     if (res.ok) { setEditing(false); onChange() }
@@ -293,7 +319,13 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
       {shareMsg && <span className="text-[11px] font-semibold text-[#2d8cff]">{shareMsg}</span>}
       <PostMenu
         mine={post.mine}
-        onEdit={post.mine ? () => { setEditBody(post.body); setEditing(true) } : undefined}
+        onEdit={post.mine ? () => {
+          setEditBody(post.body)
+          setEditImageUrl(post.imageUrl)
+          setEditMediaType((post.mediaType as 'image' | 'video') ?? 'image')
+          setEditAspectRatio(post.aspectRatio)
+          setEditing(true)
+        } : undefined}
         onDelete={post.mine ? deletePost : undefined}
         onShare={share}
       />
@@ -306,8 +338,34 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
           rows={3}
           className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] p-3 text-[15px] leading-6 text-white outline-none focus:border-[#2d8cff]/50"
         />
+        {editImageUrl && (
+          <div className="mt-3">
+            <div className="relative mx-auto max-h-[420px] overflow-hidden rounded-2xl border border-white/10" style={{ aspectRatio: ASPECT_RATIOS[editAspectRatio]?.css ?? ASPECT_RATIOS.square.css }}>
+              {editMediaType === 'video' ? (
+                <video src={editImageUrl} className="h-full w-full object-cover" controls playsInline />
+              ) : (
+                <img src={editImageUrl} alt="" className="h-full w-full object-cover" />
+              )}
+              <button onClick={() => setEditImageUrl(null)} className="absolute right-2 top-2 rounded-full bg-black/70 p-1.5"><X size={14} /></button>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {Object.entries(ASPECT_RATIOS).map(([key, r]) => (
+                <button key={key} onClick={() => setEditAspectRatio(key)} className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${editAspectRatio === key ? 'bg-[#2d8cff] text-white' : 'bg-white/[0.05] text-white/45'}`}>
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="mt-2">
+          <input ref={editFileRef} type="file" accept="image/*,video/mp4,video/quicktime,video/webm" onChange={onEditFile} className="hidden" />
+          <button onClick={() => editFileRef.current?.click()} className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-white/70">
+            {editUploading ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
+            {editImageUrl ? 'Replace photo/video' : 'Add photo/video'}
+          </button>
+        </div>
         <div className="mt-2 flex gap-2">
-          <button onClick={saveEdit} disabled={savingEdit || !editBody.trim()} className="rounded-lg bg-[#2d8cff] px-3.5 py-1.5 text-xs font-bold text-white disabled:opacity-40">
+          <button onClick={saveEdit} disabled={savingEdit || editUploading || (!editBody.trim() && !editImageUrl)} className="rounded-lg bg-[#2d8cff] px-3.5 py-1.5 text-xs font-bold text-white disabled:opacity-40">
             {savingEdit ? 'Saving...' : 'Save'}
           </button>
           <button onClick={() => setEditing(false)} className="rounded-lg bg-white/[0.06] px-3.5 py-1.5 text-xs font-semibold text-white/70">
@@ -318,7 +376,7 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
     ) : (
       post.body && <p className="mt-3 whitespace-pre-wrap text-[15px] leading-6 text-white/90">{post.body}</p>
     )}
-    {post.imageUrl && (
+    {!editing && post.imageUrl && (
       <div
         className="-mx-3 mt-3 w-[calc(100%+24px)] overflow-hidden bg-black"
         style={{ aspectRatio: ASPECT_RATIOS[post.aspectRatio]?.css ?? ASPECT_RATIOS.square.css }}
