@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { Bookmark, Film, Heart, ImagePlus, Loader2, MessageCircle, MoreHorizontal, Send, Users, X } from 'lucide-react'
 import { initials, timeAgo } from '@/lib/format'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { ConnectButton, type ConnectionStatus } from '@/components/app/ConnectButton'
 
-export type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null } | null
+export type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null; connectionId?: string | null; connectionStatus?: ConnectionStatus } | null
 export type Post = { id: string; memberId: string; body: string; imageUrl: string | null; mediaType: string; aspectRatio: string; kind: string; createdAt: string; author: Author; likeCount: number; commentCount: number; likedByMe: boolean; mine: boolean; savedByMe?: boolean }
 type Comment = { id: string; body: string; createdAt: string; author: Author }
 type Me = { fullName: string; businessName: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null }
@@ -233,6 +234,9 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
         </>
       )}
       {post.kind !== 'update' && <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${kind.cls}`}>{kind.label}</span>}
+      {post.author?.id && !post.mine && post.author.connectionStatus && post.author.connectionStatus !== 'accepted' && (
+        <ConnectButton memberId={post.author.id} connectionId={post.author.connectionId} status={post.author.connectionStatus} size="sm" />
+      )}
       <MoreHorizontal size={19} className="text-white/45" />
     </div>
     {post.body && <p className="mt-3 whitespace-pre-wrap text-[15px] leading-6 text-white/90">{post.body}</p>}

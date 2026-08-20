@@ -12,11 +12,16 @@ export function MessageThread({ meId, counterpartId }: { meId: string; counterpa
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const [blocked, setBlocked] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   async function load() {
     const res = await fetch(`/api/member/messages/${counterpartId}`)
-    if (res.ok) setMessages((await res.json()).messages ?? [])
+    if (res.ok) {
+      setMessages((await res.json()).messages ?? [])
+    } else if (res.status === 403) {
+      setBlocked(true)
+    }
     setLoading(false)
   }
 
@@ -52,6 +57,15 @@ export function MessageThread({ meId, counterpartId }: { meId: string; counterpa
     return (
       <div className="flex justify-center py-14 text-white/30">
         <Loader2 className="animate-spin" />
+      </div>
+    )
+  }
+
+  if (blocked) {
+    return (
+      <div className="py-16 text-center">
+        <p className="font-semibold text-white">You're not connected yet.</p>
+        <p className="mt-1 px-6 text-sm text-white/40">Connect with this member from their profile to start messaging.</p>
       </div>
     )
   }

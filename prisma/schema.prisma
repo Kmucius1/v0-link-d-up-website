@@ -195,12 +195,46 @@ model Member {
   updatedAt      DateTime @updatedAt
   lastSeenAt     DateTime?
 
-  posts             Post[]
-  comments          PostComment[]
-  likes             PostLike[]
-  pushSubscriptions PushSubscription[]
+  posts                Post[]
+  comments             PostComment[]
+  likes                PostLike[]
+  pushSubscriptions    PushSubscription[]
+  connectionsSent      Connection[]        @relation("ConnectionRequester")
+  connectionsReceived  Connection[]        @relation("ConnectionRecipient")
+  messagesSent         DmMessage[]         @relation("DmSender")
+  messagesReceived     DmMessage[]         @relation("DmRecipient")
 
   @@map("members")
+}
+
+model Connection {
+  id          String   @id @default(cuid())
+  requesterId String
+  recipientId String
+  status      String   @default("pending") // pending | accepted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester Member @relation("ConnectionRequester", fields: [requesterId], references: [id])
+  recipient Member @relation("ConnectionRecipient", fields: [recipientId], references: [id])
+
+  @@unique([requesterId, recipientId])
+  @@map("connections")
+}
+
+// Documents the pre-existing dm_messages table so schema matches the live DB.
+model DmMessage {
+  id          String    @id @default(cuid())
+  senderId    String
+  recipientId String
+  body        String
+  createdAt   DateTime  @default(now())
+  readAt      DateTime?
+
+  sender    Member @relation("DmSender", fields: [senderId], references: [id])
+  recipient Member @relation("DmRecipient", fields: [recipientId], references: [id])
+
+  @@map("dm_messages")
 }
 
 model Post {
@@ -234,9 +268,10 @@ model PostComment {
 }
 
 model PostLike {
-  id       String @id @default(cuid())
-  postId   String
-  memberId String
+  id        String   @id @default(cuid())
+  postId    String
+  memberId  String
+  createdAt DateTime @default(now())
 
   post   Post   @relation(fields: [postId], references: [id])
   member Member @relation(fields: [memberId], references: [id])

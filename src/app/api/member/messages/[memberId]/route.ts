@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getMember } from '@/lib/member-auth'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isAcceptedConnection } from '@/lib/connections'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ memberId: string }> }) {
   const member = await getMember()
@@ -15,6 +16,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ memb
     .eq('id', counterpartId)
     .maybeSingle()
   if (!counterpart) return NextResponse.json({ error: 'Member not found.' }, { status: 404 })
+
+  if (!(await isAcceptedConnection(member.id, counterpartId))) {
+    return NextResponse.json({ error: 'Connect with this member to message them.' }, { status: 403 })
+  }
 
   const { data: messages } = await supabaseAdmin
     .from('dm_messages')
@@ -56,6 +61,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ mem
       .eq('id', counterpartId)
       .maybeSingle()
     if (!counterpart) return NextResponse.json({ error: 'Member not found.' }, { status: 404 })
+
+    if (!(await isAcceptedConnection(member.id, counterpartId))) {
+      return NextResponse.json({ error: 'Connect with this member to message them.' }, { status: 403 })
+    }
 
     const message = {
       id: crypto.randomUUID(),

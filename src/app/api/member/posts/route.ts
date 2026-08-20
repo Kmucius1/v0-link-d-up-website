@@ -22,14 +22,21 @@ export async function GET() {
 
   const memberIds = [...new Set(posts.map((p) => p.memberId))]
   const postIds = posts.map((p) => p.id)
+  const otherMemberIds = memberIds.filter((id) => id !== member.id)
 
-  const [{ data: members }, { data: likes }, { data: comments }] = await Promise.all([
+  const [{ data: members }, { data: likes }, { data: comments }, { data: connections }] = await Promise.all([
     supabaseAdmin
       .from('members')
       .select('id, firstName, fullName, businessName, roleOrIndustry, instagram, avatarUrl, avatarPositionX, avatarPositionY')
       .in('id', memberIds),
     supabaseAdmin.from('post_likes').select('postId, memberId').in('postId', postIds),
     supabaseAdmin.from('post_comments').select('postId').in('postId', postIds),
+    otherMemberIds.length
+      ? supabaseAdmin
+          .from('connections')
+          .select('id, requesterId, recipientId, status')
+          .or(`requesterId.eq.${member.id},recipientId.eq.${member.id}`)
+      : Promise.resolve({ data: [] }),
   ])
 
   const memberMap = new Map((members ?? []).map((m) => [m.id, m]))
@@ -44,14 +51,28 @@ export async function GET() {
     commentCount.set(c.postId, (commentCount.get(c.postId) ?? 0) + 1)
   }
 
-  const enriched = posts.map((p) => ({
-    ...p,
-    author: memberMap.get(p.memberId) ?? null,
-    likeCount: likeCount.get(p.id) ?? 0,
-    commentCount: commentCount.get(p.id) ?? 0,
-    likedByMe: likedByMe.has(p.id),
-    mine: p.memberId === member.id,
-  }))
+  const connectionByOther = new Map<string, { id: string; status: 'accepted' | 'pending_sent' | 'pending_received' }>()
+  for (const c of connections ?? []) {
+    const otherId = c.requesterId === member.id ? c.recipientId : c.requesterId
+    const status = c.status === 'accepted' ? 'accepted' : c.requesterId === member.id ? 'pending_sent' : 'pending_received'
+    connectionByOther.set(otherId, { id: c.id, status })
+  }
+
+  const enriched = posts.map((p) => {
+    const authorRow = memberMap.get(p.memberId)
+    const conn = p.memberId !== member.id ? connectionByOther.get(p.memberId) : undefined
+    const author = authorRow
+      ? { ...authorRow, connectionId: conn?.id ?? null, connectionStatus: conn?.status ?? 'none' }
+      : null
+    return {
+      ...p,
+      author,
+      likeCount: likeCount.get(p.id) ?? 0,
+      commentCount: commentCount.get(p.id) ?? 0,
+      likedByMe: likedByMe.has(p.id),
+      mine: p.memberId === member.id,
+    }
+  })
 
   return NextResponse.json({ posts: enriched })
 }

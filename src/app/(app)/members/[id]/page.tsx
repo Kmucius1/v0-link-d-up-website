@@ -4,6 +4,7 @@ import { requireMember } from '@/lib/member-auth'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { AppHeader } from '@/components/app/AppHeader'
 import { HighlightsRow } from '@/components/app/HighlightsRow'
+import { ConnectButton, type ConnectionStatus } from '@/components/app/ConnectButton'
 import { initials } from '@/lib/format'
 import { MessageCircle, Link2, MapPin, Play } from 'lucide-react'
 
@@ -15,7 +16,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
 
   if (id === me.id) redirect('/profile')
 
-  const [{ data: person }, { data: posts }] = await Promise.all([
+  const [{ data: person }, { data: posts }, { data: connection }] = await Promise.all([
     supabaseAdmin
       .from('members')
       .select('id, fullName, businessName, roleOrIndustry, city, bio, instagram, website, avatarUrl, avatarPositionX, avatarPositionY, status')
@@ -27,9 +28,22 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
       .eq('memberId', id)
       .order('createdAt', { ascending: false })
       .limit(9),
+    supabaseAdmin
+      .from('connections')
+      .select('id, requesterId, recipientId, status')
+      .or(`and(requesterId.eq.${me.id},recipientId.eq.${id}),and(requesterId.eq.${id},recipientId.eq.${me.id})`)
+      .maybeSingle(),
   ])
 
   if (!person || person.status === 'suspended') notFound()
+
+  const connectionStatus: ConnectionStatus = !connection
+    ? 'none'
+    : connection.status === 'accepted'
+      ? 'accepted'
+      : connection.requesterId === me.id
+        ? 'pending_sent'
+        : 'pending_received'
 
   return (
     <div className="pb-10 lg:mx-auto lg:max-w-md">
@@ -74,12 +88,24 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
           </a>
         )}
 
-        <Link
-          href={`/messages/${person.id}`}
-          className="mt-5 flex h-11 items-center justify-center gap-2 rounded-xl bg-[#2d8cff] text-sm font-bold text-white active:bg-[#1c73dd]"
-        >
-          <MessageCircle size={17} /> Message
-        </Link>
+        <div className="mt-5 flex gap-2">
+          <ConnectButton memberId={person.id} connectionId={connection?.id} status={connectionStatus} size="md" />
+          {connectionStatus === 'accepted' ? (
+            <Link
+              href={`/messages/${person.id}`}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-sm font-bold text-white active:bg-white/[0.08]"
+            >
+              <MessageCircle size={17} /> Message
+            </Link>
+          ) : (
+            <span
+              title="Connect to start messaging"
+              className="flex h-11 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] text-sm font-bold text-white/30"
+            >
+              <MessageCircle size={17} /> Message
+            </span>
+          )}
+        </div>
       </section>
 
       <HighlightsRow memberId={person.id} />
