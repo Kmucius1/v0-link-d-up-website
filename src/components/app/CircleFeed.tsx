@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Bookmark, Film, Heart, ImagePlus, Loader2, MessageCircle, MoreHorizontal, Send, Users, X } from 'lucide-react'
+import { Bookmark, Film, Heart, ImagePlus, Loader2, MessageCircle, Send, Users, X } from 'lucide-react'
 import { initials, timeAgo } from '@/lib/format'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { ConnectButton, type ConnectionStatus } from '@/components/app/ConnectButton'
+import { PostMenu } from '@/components/app/PostMenu'
 
 export type Author = { id?: string; fullName: string; businessName: string | null; roleOrIndustry?: string | null; avatarUrl: string | null; avatarPositionX?: number | null; avatarPositionY?: number | null; connectionId?: string | null; connectionStatus?: ConnectionStatus } | null
 export type Post = { id: string; memberId: string; body: string; imageUrl: string | null; mediaType: string; aspectRatio: string; kind: string; createdAt: string; author: Author; likeCount: number; commentCount: number; likedByMe: boolean; mine: boolean; savedByMe?: boolean }
@@ -218,6 +219,10 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
   const [likeCount, setLikeCount] = useState(post.likeCount)
   const [saved, setSaved] = useState(Boolean(post.savedByMe))
   const [showComments, setShowComments] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editBody, setEditBody] = useState(post.body)
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [shareMsg, setShareMsg] = useState('')
   const name = post.author?.fullName || 'Member'
   const subtitle = post.author?.businessName || post.author?.roleOrIndustry
   const kind = KINDS[post.kind] ?? KINDS.update
@@ -233,6 +238,39 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
     setSaved(v => !v)
     const res = await fetch(`/api/member/posts/${post.id}/save`, { method: 'POST' })
     if (res.ok) { const d = await res.json(); setSaved(d.saved) }
+  }
+
+  async function saveEdit() {
+    if (!editBody.trim()) return
+    setSavingEdit(true)
+    const res = await fetch(`/api/member/posts/${post.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body: editBody.trim() }),
+    })
+    setSavingEdit(false)
+    if (res.ok) { setEditing(false); onChange() }
+  }
+
+  async function deletePost() {
+    if (!window.confirm('Delete this post? This can’t be undone.')) return
+    const res = await fetch(`/api/member/posts/${post.id}`, { method: 'DELETE' })
+    if (res.ok) onChange()
+  }
+
+  async function share() {
+    const url = `${window.location.origin}/circle/post/${post.id}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ url, title: "LINK'D UP" })
+        return
+      } catch {
+        return
+      }
+    }
+    await navigator.clipboard.writeText(url)
+    setShareMsg('Link copied')
+    setTimeout(() => setShareMsg(''), 2000)
   }
 
   return <article className="-mx-3 border-b border-white/8 px-3 py-4 lg:mx-0 lg:mb-4 lg:rounded-2xl lg:border lg:border-b lg:bg-white/[0.02] lg:last:mb-0">
@@ -252,9 +290,34 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
       {post.author?.id && !post.mine && post.author.connectionStatus && post.author.connectionStatus !== 'accepted' && (
         <ConnectButton memberId={post.author.id} connectionId={post.author.connectionId} status={post.author.connectionStatus} size="sm" />
       )}
-      <MoreHorizontal size={19} className="text-white/45" />
+      {shareMsg && <span className="text-[11px] font-semibold text-[#2d8cff]">{shareMsg}</span>}
+      <PostMenu
+        mine={post.mine}
+        onEdit={post.mine ? () => { setEditBody(post.body); setEditing(true) } : undefined}
+        onDelete={post.mine ? deletePost : undefined}
+        onShare={share}
+      />
     </div>
-    {post.body && <p className="mt-3 whitespace-pre-wrap text-[15px] leading-6 text-white/90">{post.body}</p>}
+    {editing ? (
+      <div className="mt-3">
+        <textarea
+          value={editBody}
+          onChange={(e) => setEditBody(e.target.value)}
+          rows={3}
+          className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] p-3 text-[15px] leading-6 text-white outline-none focus:border-[#2d8cff]/50"
+        />
+        <div className="mt-2 flex gap-2">
+          <button onClick={saveEdit} disabled={savingEdit || !editBody.trim()} className="rounded-lg bg-[#2d8cff] px-3.5 py-1.5 text-xs font-bold text-white disabled:opacity-40">
+            {savingEdit ? 'Saving...' : 'Save'}
+          </button>
+          <button onClick={() => setEditing(false)} className="rounded-lg bg-white/[0.06] px-3.5 py-1.5 text-xs font-semibold text-white/70">
+            Cancel
+          </button>
+        </div>
+      </div>
+    ) : (
+      post.body && <p className="mt-3 whitespace-pre-wrap text-[15px] leading-6 text-white/90">{post.body}</p>
+    )}
     {post.imageUrl && (
       <div
         className="-mx-3 mt-3 w-[calc(100%+24px)] overflow-hidden bg-black"
@@ -275,7 +338,7 @@ export function PostCard({ post, onChange }: { post: Post; onChange: () => void 
     <div className="mt-3 flex items-center gap-5 text-white/70">
       <button onClick={like} className="flex items-center gap-1.5"><Heart size={22} className={liked ? 'fill-[#2d8cff] text-[#2d8cff]' : ''}/>{likeCount > 0 && <span className="text-xs">{likeCount}</span>}</button>
       <button onClick={() => setShowComments(v => !v)} className="flex items-center gap-1.5"><MessageCircle size={22}/>{post.commentCount > 0 && <span className="text-xs">{post.commentCount}</span>}</button>
-      <Send size={21}/>
+      <button onClick={share} aria-label="Share post"><Send size={21}/></button>
       <button onClick={save} className="ml-auto"><Bookmark size={21} className={saved ? 'fill-white text-white' : ''} /></button>
     </div>
     {showComments && <Comments postId={post.id} onAdded={onChange} />}
